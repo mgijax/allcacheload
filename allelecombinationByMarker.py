@@ -122,6 +122,11 @@ def processByGenotype(objectKey):
     process()
 
 def processNote(objectKey, notes, noteTypeKey):
+    # Purpose: generate string for MGI Note insertion
+    # Returns: noteCmd, a string that contains the insert commands
+    # Assumes:
+    # Effects:
+    # Throws:
 
     noteCmd = 'insert into MGI_Note' + \
               ' values (@noteKey, %s, %s, %s, %s, %s, getdate(), getdate())\n' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
@@ -137,6 +142,8 @@ def processNote(objectKey, notes, noteTypeKey):
     if len(notes) > 0:
 	noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
 		' values (@noteKey, %d, "%s", %s, %s, getdate(), getdate())\n' % (seqNum, notes, userKey, userKey)
+
+    # increment the MGI_Note._Note_key
 
     noteCmd = noteCmd + 'select @noteKey = @noteKey + 1\n'
 
@@ -155,9 +162,9 @@ def process():
 
     results = db.sql('select g._Genotype_key, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, ' +
 	    'allele1WildType = a1.isWildType, allele2WildType = a2.isWildType, ' + \
-	    'mgiID1 = c1.accID, mgiID2 = c2.accID, genotypeID = c3.accID, g.sequenceNum, m.chromosome ' + \
+	    'mgiID1 = c1.accID, mgiID2 = c2.accID, g.sequenceNum, m.chromosome ' + \
 	    'from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, ' + \
-	    'ACC_Accession c1, ACC_Accession c2, ACC_Accession c3, MRK_Marker m ' + \
+	    'ACC_Accession c1, ACC_Accession c2, MRK_Marker m ' + \
 	    'where p._Genotype_key = g._Genotype_key ' + \
 	    'and g._PairState_key = t1._Term_key ' + \
 	    'and g._Compound_key = t2._Term_key ' + \
@@ -173,18 +180,13 @@ def process():
 	    'and c2._LogicalDB_key = 1 ' + \
 	    'and c2.prefixPart = "MGI:" ' + \
 	    'and c2.preferred = 1 ' + \
-	    'and g._Genotype_key = c3._Object_key ' + \
-	    'and c3._MGIType_key = 12 ' + \
-	    'and c3._LogicalDB_key = 1 ' + \
-	    'and c3.prefixPart = "MGI:" ' + \
-	    'and c3.preferred = 1 ' + \
 	    'and g._Marker_key = m._Marker_key ' + \
 	    'union ' + \
 	    'select g._Genotype_key, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = null, ' + \
 	    'allele1WildType = a1.isWildType, allele2WildType = 0, ' + \
-	    'mgiID1 = c1.accID, mgiID2 = null, genotypeID = c3.accID, g.sequenceNum, m.chromosome ' + \
+	    'mgiID1 = c1.accID, mgiID2 = null, g.sequenceNum, m.chromosome ' + \
 	    'from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ' + \
-	    'ACC_Accession c1, ACC_Accession c3, MRK_Marker m ' + \
+	    'ACC_Accession c1, MRK_Marker m ' + \
 	    'where p._Genotype_key = g._Genotype_key ' + \
 	    'and g._PairState_key = t1._Term_key ' + \
 	    'and g._Compound_key = t2._Term_key ' + \
@@ -195,11 +197,6 @@ def process():
 	    'and c1._LogicalDB_key = 1 ' + \
 	    'and c1.prefixPart = "MGI:" ' + \
 	    'and c1.preferred = 1 ' + \
-	    'and g._Genotype_key = c3._Object_key ' + \
-	    'and c3._MGIType_key = 12 ' + \
-	    'and c3._LogicalDB_key = 1 ' + \
-	    'and c3.prefixPart = "MGI:" ' + \
-	    'and c3.preferred = 1 ' + \
 	    'and g._Marker_key = m._Marker_key ' + \
 	    'order by g._Genotype_key, g.sequenceNum', 'auto')
 
@@ -231,7 +228,6 @@ def process():
 
         for r in genotypes[g]:
 
-	    genotypeID = r['genotypeID']
             compound = r['compound']
             alleleState = r['alleleState']
 	    chr = r['chromosome']
@@ -353,8 +349,13 @@ def process():
             displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
             displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
 
+	#
+	# initialize the MGI_Note._Note_key primary key
+	#
+
         cmd = 'declare @noteKey integer\n'
         cmd = cmd + 'select @noteKey = max(_Note_key + 1) from MGI_Note\n'
+
 	cmd = cmd + processNote(objectKey, displayNotes1, combNoteType1) 
 	cmd = cmd + processNote(objectKey, displayNotes2, combNoteType2)
 	cmd = cmd + processNote(objectKey, displayNotes3, combNoteType3)
@@ -400,11 +401,11 @@ db.set_sqlLogin(user, password, server, database)
 db.useOneConnection(1)
 db.set_sqlLogFunction(db.sqlLogAll)
 
-scriptName = os.path.basename(sys.argv[0])
-
 userKey = loadlib.verifyUser(user, 0, None)
 
 # call functions based on the way the program is invoked
+
+scriptName = os.path.basename(sys.argv[0])
 
 # all of these invocations will only affect a certain subset of data
 
