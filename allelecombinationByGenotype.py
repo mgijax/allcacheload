@@ -356,9 +356,9 @@ def process():
         cmd = 'declare @noteKey integer\n'
         cmd = cmd + 'select @noteKey = max(_Note_key + 1) from MGI_Note\n'
 
-	cmd = cmd + processNote(objectKey, displayNotes1, combNoteType1) 
-	cmd = cmd + processNote(objectKey, displayNotes2, combNoteType2)
-	cmd = cmd + processNote(objectKey, displayNotes3, combNoteType3)
+	cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
+	cmd = cmd + processNote(g, displayNotes2, combNoteType2)
+	cmd = cmd + processNote(g, displayNotes3, combNoteType3)
 	db.sql(cmd, None)
 
 #
