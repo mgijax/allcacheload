@@ -1,0 +1,18 @@
+#!/bin/csh
+
+#
+# Install
+#
+# Installs product "allcacheload" in the appropriate directory
+#
+# 1. cvs export -r allcacheload-#-#-# allcacheload
+# 2. Copy Configuration.default Configuration
+# 3. Edit Configuration
+# 4. Install
+#
+
+cd `dirname $0` && source ./Configuration
+
+mkdir ${ALLCACHEDIR}
+mkdir ${ALLCACHEBCPDIR}
+mkdir ${ALLCACHELOGDIR}

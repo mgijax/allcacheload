@@ -1,0 +1,26 @@
+#!/bin/csh
+
+#
+# Configuration.default
+#
+# Source this file from any csh script to set the
+# env variables
+#
+
+# install directory
+setenv ALLCACHEINSTALLDIR	/usr/local/mgi/live/dbutils/allcacheload
+
+# directory
+setenv ALLCACHEDIR		/data/loads/mgi/allcacheload
+
+# bcp output directory
+setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
+
+# log directory
+setenv ALLCACHELOGDIR		${ALLCACHEDIR}/logs
+
+# schema product directory
+setenv SCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
+
+source $SCHEMADIR/Configuration
+
