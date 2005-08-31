@@ -45,8 +45,10 @@ import getopt
 import string
 import db
 import loadlib
+import reportlib
 
-newline = '\n'
+bcpnewline = '\\n'
+sqlnewline = '\n'
 mgiTypeKey = 12
 userKey = 0
 combNoteType1 = 1016
@@ -70,6 +72,25 @@ def showUsage():
 	sys.stderr.write(usage)
 	sys.exit(1)
  
+def processAll():
+    # Purpose: processes all Genotype data
+    # Returns:
+    # Assumes:
+    # Effects:
+    # Throws:
+
+    # select all Genotypes
+
+    db.sql('select _Genotype_key = a._Object_key, genotypeID = a.accID into #toprocess ' + \
+	'from ACC_Accession a ' + \
+	'where a._MGIType_key = 12 ' + \
+	'and a._LogicalDB_key = 1 ' + \
+	'and a.prefixPart = "MGI:" ' + \
+	'and a.preferred = 1', None)
+    db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
+
+    process('bcp')
+
 def processByAllele(objectKey):
     # Purpose: processes data for a specific Allele
     # Returns:
@@ -85,7 +106,7 @@ def processByAllele(objectKey):
 
     db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
 
-    process()
+    process('sql')
 
 def processByMarker(objectKey):
     # Purpose: processes data for a specific Marker
@@ -102,7 +123,7 @@ def processByMarker(objectKey):
 
     db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
 
-    process()
+    process('sql')
 
 def processByGenotype(objectKey):
     # Purpose: processes data for a specific Genotype
@@ -119,7 +140,7 @@ def processByGenotype(objectKey):
 
     db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
 
-    process()
+    process('sql')
 
 def processNote(objectKey, notes, noteTypeKey):
     # Purpose: generate string for MGI Note insertion
@@ -149,7 +170,20 @@ def processNote(objectKey, notes, noteTypeKey):
 
     return noteCmd
 
-def process():
+def process(mode):
+    # Purpose: process data using either 'sql' or 'bcp' mode
+    # Returns:
+    # Assumes:
+    # Effects:
+    # Throws:
+
+    if mode == 'bcp':
+	fp1 = reportlib.init('allelecombnotetype1', printHeading = 0)
+	fp2 = reportlib.init('allelecombnotetype2', printHeading = 0)
+	fp3 = reportlib.init('allelecombnotetype3', printHeading = 0)
+	newline = bcpnewline
+    else:
+	newline = sqlnewline
 
     # delete existiing Allele Combination notes for Genotypes we're processing
 
@@ -160,7 +194,7 @@ def process():
 
     # read in appropriate records
 
-    results = db.sql('select g._Genotype_key, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, ' +
+    results = db.sql('select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, ' +
 	    'allele1WildType = a1.isWildType, allele2WildType = a2.isWildType, ' + \
 	    'mgiID1 = c1.accID, mgiID2 = c2.accID, g.sequenceNum, m.chromosome ' + \
 	    'from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, ' + \
@@ -182,7 +216,7 @@ def process():
 	    'and c2.preferred = 1 ' + \
 	    'and g._Marker_key = m._Marker_key ' + \
 	    'union ' + \
-	    'select g._Genotype_key, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = null, ' + \
+	    'select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = null, ' + \
 	    'allele1WildType = a1.isWildType, allele2WildType = 0, ' + \
 	    'mgiID1 = c1.accID, mgiID2 = null, g.sequenceNum, m.chromosome ' + \
 	    'from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ' + \
@@ -198,7 +232,7 @@ def process():
 	    'and c1.prefixPart = "MGI:" ' + \
 	    'and c1.preferred = 1 ' + \
 	    'and g._Marker_key = m._Marker_key ' + \
-	    'order by g._Genotype_key, g.sequenceNum', 'auto')
+	    'order by p._Genotype_key, g.sequenceNum', 'auto')
 
     genotypes = {}
     for r in results:
@@ -241,13 +275,13 @@ def process():
             mgiID2 = r['mgiID2']
 
             if allele1WildType == 1:
-	        topType3 = allele1
+	        topType3 = '\Allele(' + mgiID1 + '|0)'
 	    else:
 	        topType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
             if alleleState in ['Homozygous', 'Heterozygous']:
                 if allele2WildType == 1:
-		    bottomType3 = allele2
+	            bottomType3 = '\Allele(' + mgiID2 + '|0)'
                 else:
 	            bottomType3 = '\Allele(' + mgiID2 + '|' + allele2 + '|)'
 
@@ -265,7 +299,7 @@ def process():
 
             elif (alleleState == 'Hemizygous Y-linked') or (alleleState == 'Hemizygous Insertion' and chr == 'Y'):
 	        if allele1WildType == 1:
-		    bottomType3 = allele1
+	            bottomType3 = '\Allele(' + mgiID1 + '|0)'
 	        else:
 	            bottomType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
                 topType3 = 'X'
@@ -292,11 +326,13 @@ def process():
 
                 if alleleState in ['Homozygous', 'Heterozygous']:
                     bottomType1 = allele2
+
                 elif (alleleState == 'Hemizygous Y-linked') or (alleleState == 'Hemizygous Insertion' and chr == 'Y'):
                     topType1 = 'X'
                     bottomType1 = allele1
                     topType2 = topType3
                     bottomType2 = bottomType3
+
                 else:
                     bottomType1 = bottomType3
 
@@ -349,17 +385,28 @@ def process():
             displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
             displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
 
-	#
-	# initialize the MGI_Note._Note_key primary key
-	#
+	if mode == 'sql':
+	    #
+	    # initialize the MGI_Note._Note_key primary key
+	    #
 
-        cmd = 'declare @noteKey integer\n'
-        cmd = cmd + 'select @noteKey = max(_Note_key + 1) from MGI_Note\n'
+            cmd = 'declare @noteKey integer\n'
+            cmd = cmd + 'select @noteKey = max(_Note_key + 1) from MGI_Note\n'
 
-	cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
-	cmd = cmd + processNote(g, displayNotes2, combNoteType2)
-	cmd = cmd + processNote(g, displayNotes3, combNoteType3)
-	db.sql(cmd, None)
+	    cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
+	    cmd = cmd + processNote(g, displayNotes2, combNoteType2)
+	    cmd = cmd + processNote(g, displayNotes3, combNoteType3)
+	    db.sql(cmd, None)
+
+        else:
+            fp1.write(r['genotypeID'] + reportlib.TAB + displayNotes1 + reportlib.CRT)
+            fp2.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
+            fp3.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
+
+    if mode == 'bcp':
+        reportlib.finish_nonps(fp1)     # non-postscript file
+        reportlib.finish_nonps(fp2)     # non-postscript file
+        reportlib.finish_nonps(fp3)     # non-postscript file
 
 #
 # Main Routine
@@ -409,7 +456,10 @@ scriptName = os.path.basename(sys.argv[0])
 
 # all of these invocations will only affect a certain subset of data
 
-if scriptName == 'allelecombinationByAllele.py':
+if scriptName == 'allelecombination.py':
+    processAll()
+
+elif scriptName == 'allelecombinationByAllele.py':
     processByAllele(objectKey)
 
 elif scriptName == 'allelecombinationByMarker.py':
