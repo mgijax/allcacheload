@@ -275,13 +275,13 @@ def process(mode):
             mgiID2 = r['mgiID2']
 
             if allele1WildType == 1:
-	        topType3 = '\Allele(' + mgiID1 + '|0)'
+	        topType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
 	    else:
 	        topType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
             if alleleState in ['Homozygous', 'Heterozygous']:
                 if allele2WildType == 1:
-	            bottomType3 = '\Allele(' + mgiID2 + '|0)'
+	            bottomType3 = '\AlleleSymbol(' + mgiID2 + '|0)'
                 else:
 	            bottomType3 = '\Allele(' + mgiID2 + '|' + allele2 + '|)'
 
@@ -299,7 +299,7 @@ def process(mode):
 
             elif (alleleState == 'Hemizygous Y-linked') or (alleleState == 'Hemizygous Insertion' and chr == 'Y'):
 	        if allele1WildType == 1:
-	            bottomType3 = '\Allele(' + mgiID1 + '|0)'
+	            bottomType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
 	        else:
 	            bottomType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
                 topType3 = 'X'
@@ -375,7 +375,7 @@ def process(mode):
                 bottomType1 = bottomType1 + allele1
 
                 if allele1WildType == 1:
-                    bottomType2 = bottomType2 + allele1
+	            bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
                 else:
                     bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
