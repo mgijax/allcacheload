@@ -19,6 +19,11 @@ setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
 # log directory
 setenv ALLCACHELOGDIR		${ALLCACHEDIR}/logs
 
+# noteload configuration values
+setenv NOTELOAD                 /usr/local/mgi/live/dataload/noteload
+setenv NOTEMODE                 load
+setenv NOTEOBJECTTYPE           Genotype
+
 # schema product directory
 setenv SCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
 

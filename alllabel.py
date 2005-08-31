@@ -114,7 +114,7 @@ if len(sys.argv) == 2:
 else:
 	alleleKey = None
 
-outputDir = os.environ['ALLLABELBCPDIR']
+outputDir = os.environ['ALLCACHEBCPDIR']
 print '%s' % mgi_utils.date()
 outBCP = open(outputDir + '/ALL_Label.bcp', 'w')
 
