@@ -16,3 +16,8 @@ cd `dirname $0` && source ./Configuration
 mkdir ${ALLCACHEDIR}
 mkdir ${ALLCACHEBCPDIR}
 mkdir ${ALLCACHELOGDIR}
+
+ln -s allelecombination.py alleleCombinationByAllele.py
+ln -s allelecombination.py alleleCombinationByMarker.py
+ln -s allelecombination.py alleleCombinationByGenotype.py
+
