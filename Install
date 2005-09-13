@@ -17,7 +17,7 @@ mkdir ${ALLCACHEDIR}
 mkdir ${ALLCACHEBCPDIR}
 mkdir ${ALLCACHELOGDIR}
 
-ln -s allelecombination.py alleleCombinationByAllele.py
-ln -s allelecombination.py alleleCombinationByMarker.py
-ln -s allelecombination.py alleleCombinationByGenotype.py
+ln -s allelecombination.py allelecombinationByAllele.py
+ln -s allelecombination.py allelecombinationByMarker.py
+ln -s allelecombination.py allelecombinationByGenotype.py
 
