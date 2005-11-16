@@ -13,6 +13,9 @@ setenv ALLCACHEINSTALLDIR	/usr/local/mgi/live/dbutils/allcacheload
 # directory
 setenv ALLCACHEDIR		/data/loads/mgi/allcacheload
 
+# input directory
+setenv ALLCACHEINDIR		${ALLCACHEDIR}/input
+
 # bcp output directory
 setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
 
@@ -20,12 +23,24 @@ setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
 setenv ALLCACHELOGDIR		${ALLCACHEDIR}/logs
 
 # noteload configuration values
-setenv NOTELOAD                 /usr/local/mgi/live/dataload/noteload
-setenv NOTEMODE                 load
-setenv NOTEOBJECTTYPE           Genotype
+setenv NOTELOAD			/usr/local/mgi/live/dataload/noteload
+setenv NOTEMODE 		load
+setenv NOTEOBJECTTYPE       	Genotype
 
 # schema product directory
-setenv SCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
+setenv MGDDBSCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
 
-source $SCHEMADIR/Configuration
+setenv FIELDDELIM       "&#&"
 
+setenv CREATEDBY        1000
+
+# Deltagen/Lexicon
+
+setenv DGENLEXINPUT     ${ALLCACHEINDIR}/mineKOlines_wIDs.txt
+setenv LEXINDEXFILE     ${ALLCACHEINDIR}/Lexicon.index.html
+setenv DGENLEXBCP       ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp
+setenv DGENLEXBCPERR    ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp.error
+
+# this should always be the last line in this file
+
+source ${MGDDBSCHEMADIR}/Configuration
