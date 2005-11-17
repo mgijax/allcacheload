@@ -72,11 +72,15 @@ TAB = '\t'		# tab
 DL = os.environ['FIELDDELIM']
 
 inFile = ''	# file descriptor
+lexindexFile = ''	# file descriptor
 bcpFile = ''	# file descriptor
 
 inputFileName = os.environ['DGENLEXINPUT']
+lexindexFileName = os.environ['LEXINDEXFILE']
 bcpFileName = os.environ['DGENLEXBCP']
 userKey = os.environ['CREATEDBY']
+
+lexIndex = {}
 
 loaddate = loadlib.loaddate
 
@@ -105,7 +109,7 @@ def exit(
 # Throws: nothing
 
 def init():
-    global inFile, bcpFile
+    global inFile, lexindexFile, bcpFile
  
     db.useOneConnection(1)
 
@@ -115,11 +119,48 @@ def init():
         exit(1, 'Could not open file %s\n' % inputFileName)
 
     try:
+        lexindexFile = open(lexindexFileName, 'r')
+    except:
+        exit(1, 'Could not open file %s\n' % lexindexFileName)
+
+    try:
         bcpFile = open(bcpFileName, 'w')
     except:
         exit(1, 'Could not open file %s\n' % bcpFileName)
 
     return
+
+def parseLexIndex():
+#
+#	parse the Lexicon/index.html file to map the NIH ID to the correct projectid
+#
+
+    global lexIndex
+
+# <tr class="searchAltrow2"><TD nowrap valign="top"><a href="2/lexjac1.lexgen.com_3a8080/nih/analysis/treeframe.jsp@projectid=3361
+# .htm" target="_blank">NIH-0386</TD><TD valign="top">SEC</TD><TD valign="top">NM_013756</TD><TD valign="top">ACCESSION:NM_013756 NID:7304
+# 996 Mus musculus Mus musculus defensin beta 3 (Defb3), mRNA. mouse_refseq</TD></tr>
+
+    for line in lexindexFile.readlines():
+
+	if string.find(line, '<tr class="searchAltrow') < 0:
+	    continue
+
+	i = string.find(line, 'projectid')
+	j = string.find(line, '.htm')
+
+	if line[i + 9] == '=':
+	    value = line[i + 10:j]
+	else:
+	    value = line[i + 9:j]
+
+	k = string.find(line, 'NIH-')
+	l = k + 8
+	id = line[k:l]
+
+	lexIndex[id] = value
+
+    lexindexFile.close()
 
 # Purpose:  processes data
 # Returns:  nothing
@@ -128,6 +169,8 @@ def init():
 # Throws:   nothing
 
 def parseKOlines():
+
+    global lexIndex
 
     knockoutKey = 1
 
@@ -165,6 +208,14 @@ def parseKOlines():
 	markerKey = loadlib.verifyMarker(markerID, lineNum, None)
 	alleleKey = loadlib.verifyObject(alleleID, 11, None, lineNum, None)
 
+	if holder == 'Lexicon':
+	    try:
+	        companyID = lexIndex[nihID]
+            except:
+		print 'Could not find %s in Lexicon index file.\n' % (nihID)
+
+	    print companyID
+
 	bcpFile.write('%s' % (knockoutKey) + DL + \
 		      '%s' % (markerKey) + DL + \
 		      '%s' % (alleleKey) + DL + \
@@ -188,6 +239,7 @@ def parseKOlines():
 #
 
 init()
+parseLexIndex()
 parseKOlines()
 exit(0)
 
