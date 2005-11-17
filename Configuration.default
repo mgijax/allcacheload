@@ -28,7 +28,7 @@ setenv NOTEMODE 		load
 setenv NOTEOBJECTTYPE       	Genotype
 
 # schema product directory
-setenv MGDDBSCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
+setenv MGD_DBSCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
 
 setenv FIELDDELIM       "&#&"
 
@@ -43,4 +43,4 @@ setenv DGENLEXBCPERR    ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp.error
 
 # this should always be the last line in this file
 
-source ${MGDDBSCHEMADIR}/Configuration
+source ${MGD_DBSCHEMADIR}/Configuration
