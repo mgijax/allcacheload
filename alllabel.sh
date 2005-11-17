@@ -30,15 +30,15 @@ endif
 # Allow bcp into database and truncate tables
 
 ${DBUTILSBINDIR}/turnonbulkcopy.csh ${DBSERVER} ${DBNAME} | tee -a ${LOG}
-${MGD_SCHEMADIR}/table/ALL_Label_truncate.object | tee -a ${LOG}
+${MGD_DBSCHEMADIR}/table/ALL_Label_truncate.object | tee -a ${LOG}
 
 # Drop indexes
-${MGD_SCHEMADIR}/index/ALL_Label_drop.object | tee -a ${LOG}
+${MGD_DBSCHEMADIR}/index/ALL_Label_drop.object | tee -a ${LOG}
 
 # BCP new data into tables
 cat ${DBPASSWORDFILE} | bcp ${DBNAME}..ALL_Label in ${ALLCACHEBCPDIR}/ALL_Label.bcp -c -t\| -S${DBSERVER} -U${DBUSER} | tee -a ${LOG}
 
 # Create indexes
-${MGD_SCHEMADIR}/index/ALL_Label_create.object | tee -a ${LOG}
+${MGD_DBSCHEMADIR}/index/ALL_Label_create.object | tee -a ${LOG}
 
 date | tee -a ${LOG}
