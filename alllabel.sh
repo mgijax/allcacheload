@@ -29,7 +29,6 @@ endif
 
 # Allow bcp into database and truncate tables
 
-${DBUTILSBINDIR}/turnonbulkcopy.csh ${DBSERVER} ${DBNAME} | tee -a ${LOG}
 ${MGD_DBSCHEMADIR}/table/ALL_Label_truncate.object | tee -a ${LOG}
 
 # Drop indexes
