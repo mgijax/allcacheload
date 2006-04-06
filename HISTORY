@@ -1,3 +1,9 @@
+TAG: allcacheload-3-4-0-6
+DATE: 04/06/2006
+STAFF: lec
+RELEASE: A
+CHANGES: dgenlexknockout.py; removed regsub; not used
+
 TAG: allcacheload-3-4-0-5
 DATE: 11/21/2005
 STAFF: lec
