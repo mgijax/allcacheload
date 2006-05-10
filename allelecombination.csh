@@ -12,13 +12,6 @@ setenv LOG	${ALLCACHELOGDIR}/`basename $0`.log
 rm -rf $LOG
 touch $LOG
 
-date | tee -a ${LOG}
-
-setenv LOG `basename $0`.log
-
-rm -rf ${LOG}
-touch ${LOG}
- 
 date >> ${LOG}
 
 cd ${ALLCACHEBCPDIR}
