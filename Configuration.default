@@ -7,8 +7,14 @@
 # env variables
 #
 
+if ( ${?MGICONFIG} == 0 ) then
+	setenv MGICONFIG /usr/local/mgi/live/mgiconfig
+endif
+
+source ${MGICONFIG}/master.config.csh
+
 # install directory
-setenv ALLCACHEINSTALLDIR	/usr/local/mgi/live/dbutils/allcacheload
+setenv ALLCACHEINSTALLDIR	${USRLOCALMGI}/dataload/allcacheload
 
 # directory
 setenv ALLCACHEDIR		/data/loads/mgi/allcacheload
@@ -23,12 +29,9 @@ setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
 setenv ALLCACHELOGDIR		${ALLCACHEDIR}/logs
 
 # noteload configuration values
-setenv NOTELOAD			/usr/local/mgi/live/dataload/noteload
+setenv NOTELOAD			${USRLOCALMGI}/dataload/noteload
 setenv NOTEMODE 		load
 setenv NOTEOBJECTTYPE       	Genotype
-
-# schema product directory
-setenv MGD_DBSCHEMADIR		/usr/local/mgi/live/dbutils/mgd/mgddbschema
 
 setenv FIELDDELIM       "&#&"
 
@@ -41,6 +44,6 @@ setenv LEXINDEXFILE     ${ALLCACHEINDIR}/Lexicon.index.html
 setenv DGENLEXBCP       ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp
 setenv DGENLEXBCPERR    ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp.error
 
-# this should always be the last line in this file
+# this can be removed after PYTHONPATH is added to mgiconfig
+source ${MGD_DBSCHEMA}/Configuration
 
-source ${MGD_DBSCHEMADIR}/Configuration
