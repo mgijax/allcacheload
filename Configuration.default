@@ -45,5 +45,5 @@ setenv DGENLEXBCP       ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp
 setenv DGENLEXBCPERR    ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp.error
 
 # this can be removed after PYTHONPATH is added to mgiconfig
-source ${MGD_DBSCHEMA}/Configuration
+source ${MGD_DBSCHEMADIR}/Configuration
 
