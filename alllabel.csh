@@ -35,7 +35,7 @@ ${MGD_DBSCHEMADIR}/table/ALL_Label_truncate.object | tee -a ${LOG}
 ${MGD_DBSCHEMADIR}/index/ALL_Label_drop.object | tee -a ${LOG}
 
 # BCP new data into tables
-cat ${DBPASSWORDFILE} | bcp ${DBNAME}..ALL_Label in ${ALLCACHEBCPDIR}/ALL_Label.bcp -c -t\| -S${DBSERVER} -U${DBUSER} | tee -a ${LOG}
+cat ${MGD_DBPASSWORDFILE} | bcp ${MGD_DBNAME}..ALL_Label in ${ALLCACHEBCPDIR}/ALL_Label.bcp -c -t\| -S${MGD_DBSERVER} -U${MGD_DBUSER} | tee -a ${LOG}
 
 # Create indexes
 ${MGD_DBSCHEMADIR}/index/ALL_Label_create.object | tee -a ${LOG}
