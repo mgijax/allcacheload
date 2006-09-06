@@ -26,9 +26,8 @@ import os
 import db
 import mgi_utils
 
-NL = '\n'
-DL = '|'
-
+COLDL = os.environ['COLDELIM']
+LINEDL = '\n'
 loaddate = mgi_utils.date("%m/%d/%Y")
 
 #
@@ -46,14 +45,14 @@ def writeRecord(results, labelStatusKey, priority, labelType, labelTypeName):
 	if labelTypeName is None:
 	    labelTypeName = r['labelTypeName']
 
-        outBCP.write(mgi_utils.prvalue(r['_Allele_key']) + DL + \
-        	mgi_utils.prvalue(labelStatusKey) + DL + \
-        	mgi_utils.prvalue(priority) + DL + \
-        	mgi_utils.prvalue(r['label']) + DL + \
-        	mgi_utils.prvalue(labelType) + DL + \
-        	mgi_utils.prvalue(labelTypeName) + DL + \
-        	loaddate + DL + \
-        	loaddate + NL)
+        outBCP.write(mgi_utils.prvalue(r['_Allele_key']) + COLDL + \
+        	mgi_utils.prvalue(labelStatusKey) + COLDL + \
+        	mgi_utils.prvalue(priority) + COLDL + \
+        	mgi_utils.prvalue(r['label']) + COLDL + \
+        	mgi_utils.prvalue(labelType) + COLDL + \
+        	mgi_utils.prvalue(labelTypeName) + COLDL + \
+        	loaddate + COLDL + \
+        	loaddate + LINEDL)
 
     print 'processed (%d) records...%s' % (len(results), mgi_utils.date())
 
