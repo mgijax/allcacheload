@@ -13,9 +13,6 @@ endif
 
 source ${MGICONFIG}/master.config.csh
 
-# install directory
-setenv ALLCACHEINSTALLDIR	${DBUTILS}/allcacheload
-
 # directory
 setenv ALLCACHEDIR		/data/loads/mgi/allcacheload
 
@@ -29,7 +26,6 @@ setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
 setenv ALLCACHELOGDIR		${ALLCACHEDIR}/logs
 
 # noteload configuration values
-setenv NOTELOAD			${DATALOAD}/noteload
 setenv NOTEMODE 		load
 setenv NOTEOBJECTTYPE       	Genotype
 

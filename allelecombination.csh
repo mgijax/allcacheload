@@ -16,7 +16,7 @@ date >> ${LOG}
 
 cd ${ALLCACHEBCPDIR}
 
-${ALLCACHEINSTALLDIR}/allelecombination.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} -K0 | tee -a ${LOG}
+${ALLCACHELOAD}/allelecombination.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} -K0 | tee -a ${LOG}
 
 setenv DATAFILE 	allelecombnotetype1.rpt
 setenv NOTETYPE		"Combination Type 1"
