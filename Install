@@ -14,19 +14,19 @@
 cd `dirname $0` && source ./Configuration
 
 if ( ! -d ${ALLCACHEDIR} ) then
-	mkdir ${ALLCACHEDIR}
+	mkdir -p ${ALLCACHEDIR}
 endif
 
 if ( ! -d ${ALLCACHEINDIR} ) then
-	mkdir ${ALLCACHEINDIR}
+	mkdir -p ${ALLCACHEINDIR}
 endif
 
 if ( ! -d ${ALLCACHEBCPDIR} ) then
-	mkdir ${ALLCACHEBCPDIR}
+	mkdir -p ${ALLCACHEBCPDIR}
 endif
 
 if ( ! -d ${ALLCACHELOGDIR} ) then
-	mkdir ${ALLCACHELOGDIR}
+	mkdir -p ${ALLCACHELOGDIR}
 endif
 
 ln -s allelecombination.py allelecombinationByAllele.py
