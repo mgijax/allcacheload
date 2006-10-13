@@ -178,9 +178,9 @@ def process(mode):
     # Throws:
 
     if mode == 'bcp':
-	fp1 = reportlib.init('allelecombnotetype1', printHeading = 0)
-	fp2 = reportlib.init('allelecombnotetype2', printHeading = 0)
-	fp3 = reportlib.init('allelecombnotetype3', printHeading = 0)
+	fp1 = reportlib.init('allelecombnotetype1', printHeading = None)
+	fp2 = reportlib.init('allelecombnotetype2', printHeading = None)
+	fp3 = reportlib.init('allelecombnotetype3', printHeading = None)
 	newline = bcpnewline
     else:
 	newline = sqlnewline
