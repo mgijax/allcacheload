@@ -35,7 +35,7 @@ setenv CREATEDBY        1000
 
 # Deltagen/Lexicon
 
-setenv DGENLEXINPUT     ${ALLCACHEINDIR}/mineKOlines_wIDs.txt
+setenv DGENLEXINPUT     ${ALLCACHEINDIR}/DeltagenNew.txt
 setenv LEXINDEXFILE     ${ALLCACHEINDIR}/Lexicon.index.html
 setenv DGENLEXBCP       ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp
 setenv DGENLEXBCPERR    ${ALLCACHEBCPDIR}/DGENLEX_Knockout.bcp.error

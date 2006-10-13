@@ -28,15 +28,15 @@ endif
 
 # truncate tables
 
-${MGD_DBSCHEMADIR}/table/ALL_Knockout_Cache_truncate.object | tee -a ${LOG}
+#${MGD_DBSCHEMADIR}/table/ALL_Knockout_Cache_truncate.object | tee -a ${LOG}
 
 # Drop indexes
-${MGD_DBSCHEMADIR}/index/ALL_Knockout_Cache_drop.object | tee -a ${LOG}
+#${MGD_DBSCHEMADIR}/index/ALL_Knockout_Cache_drop.object | tee -a ${LOG}
 
 # BCP new data into tables
-cat ${MGD_DBPASSWORDFILE} | bcp ${MGD_DBNAME}..ALL_Knockout_Cache in ${DGENLEXBCP} -e ${DGENLEXBCPERR} -c -t${FIELDDELIM} -S${MGD_DBSERVER} -U${MGD_DBUSER} | tee -a ${LOG}
+cat ${MGD_DBPASSWORDFILE} | bcp ${MGD_DBNAME}..ALL_Knockout_Cache in ${DGENLEXBCP} -e ${DGENLEXBCPERR} -c -t${COLDELIM} -S${MGD_DBSERVER} -U${MGD_DBUSER} | tee -a ${LOG}
 
 # Create indexes
-${MGD_DBSCHEMADIR}/index/ALL_Knockout_Cache_create.object | tee -a ${LOG}
+#${MGD_DBSCHEMADIR}/index/ALL_Knockout_Cache_create.object | tee -a ${LOG}
 
 date | tee -a ${LOG}

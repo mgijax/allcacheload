@@ -68,7 +68,7 @@ import loadlib
 #globals
 
 TAB = '\t'		# tab
-DL = os.environ['FIELDDELIM']
+DL = os.environ['COLDELIM']
 
 inFile = ''	# file descriptor
 lexindexFile = ''	# file descriptor
@@ -117,10 +117,10 @@ def init():
     except:
         exit(1, 'Could not open file %s\n' % inputFileName)
 
-    try:
-        lexindexFile = open(lexindexFileName, 'r')
-    except:
-        exit(1, 'Could not open file %s\n' % lexindexFileName)
+#    try:
+#        lexindexFile = open(lexindexFileName, 'r')
+#    except:
+#        exit(1, 'Could not open file %s\n' % lexindexFileName)
 
     try:
         bcpFile = open(bcpFileName, 'w')
@@ -172,6 +172,10 @@ def parseKOlines():
     global lexIndex
 
     knockoutKey = 1
+
+    result = db.sql('select max(_Knockout_key) + 1 from ALL_Knockout_Cache', 'auto')
+    if result[0][''] != None:
+	knockoutKey = result[0]['']
 
     # For each line in the input file
 
@@ -238,7 +242,7 @@ def parseKOlines():
 #
 
 init()
-parseLexIndex()
+#parseLexIndex()
 parseKOlines()
 exit(0)
 
