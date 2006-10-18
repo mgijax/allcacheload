@@ -11,6 +11,8 @@
 
 cd `dirname $0` && source ./Configuration
 
+setenv MGD_DBNAME mgd_wi2
+
 setenv LOG	${ALLCACHELOGDIR}/`basename $0`.log
 rm -rf $LOG
 touch $LOG
