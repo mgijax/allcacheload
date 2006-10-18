@@ -185,9 +185,9 @@ def parseKOlines():
 
 	# skip header
 
-	if lineNum == 0:
-	    lineNum = lineNum + 1
-	    continue
+#	if lineNum == 0:
+#	    lineNum = lineNum + 1
+#	    continue
 
         # Split the line into tokens
         tokens = string.split(line[:-1], TAB)
