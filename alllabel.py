@@ -7,7 +7,6 @@
 # Create bcp file for ALL_Label
 #
 # Uses environment variables to determine Server and Database
-# (DSQUERY and MGD).
 #
 # Usage:
 #	alllabel.py [alleleKey]
