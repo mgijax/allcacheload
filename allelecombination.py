@@ -358,9 +358,11 @@ def process(mode):
                 if foundTop >= 1:
                     topType1 = topType1 + ' '
                     topType2 = topType2 + ' '
-
-                topType1 = topType1 + allele1
-                topType2 = topType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                    topType1 = topType1 + allele1
+                    topType2 = topType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+		else:
+                    topType1 = allele1
+                    topType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 foundTop = foundTop + 1
 
@@ -371,8 +373,9 @@ def process(mode):
                 if foundBottom >= 1:
                     bottomType1 = bottomType1 + ' '
                     bottomType2 = bottomType2 + ' '
-
-                bottomType1 = bottomType1 + allele1
+                    bottomType1 = bottomType1 + allele1
+		else:
+                    bottomType1 = allele1
 
                 if allele1WildType == 1:
 	            bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
