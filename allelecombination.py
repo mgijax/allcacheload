@@ -353,13 +353,14 @@ def process(mode):
                     foundTop = 0
                     foundBottom = 0
 
-                # new top, same group: need space to separate tops
+                # new top, same group: need space to separate tops + existing information
 
                 if foundTop >= 1:
-                    topType1 = topType1 + ' '
-                    topType2 = topType2 + ' '
-                    topType1 = topType1 + allele1
-                    topType2 = topType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                    topType1 = topType1 + ' ' + allele1
+                    topType2 = topType2 + ' \Allele(' + mgiID1 + '|' + allele1 + '|)'
+
+		# if there is no top, then copy in existing information
+
 		else:
                     topType1 = allele1
                     topType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
@@ -368,19 +369,26 @@ def process(mode):
 
             elif compound == 'Bottom':
 
-                # new bottom, same group: need space to separate bottoms
+                # new bottom, same group: need space to separate bottoms + existing information
 
                 if foundBottom >= 1:
-                    bottomType1 = bottomType1 + ' '
+                    bottomType1 = bottomType1 + ' ' + allele1
                     bottomType2 = bottomType2 + ' '
-                    bottomType1 = bottomType1 + allele1
+
+                    if allele1WildType == 1:
+	                bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
+                    else:
+                        bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+
+		# if there is no bottom, then copy in existing information
+
 		else:
                     bottomType1 = allele1
 
-                if allele1WildType == 1:
-	            bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
-                else:
-                    bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                    if allele1WildType == 1:
+	                bottomType2 = '\AlleleSymbol(' + mgiID1 + '|0)'
+                    else:
+                        bottomType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 foundBottom = foundBottom + 1
 
