@@ -100,10 +100,11 @@ def processByAllele(objectKey):
 
     # select all Genotypes of a specified Allele
 
-    db.sql('select distinct _Genotype_key into #toprocess ' + \
+    cmd = 'select distinct _Genotype_key into #toprocess ' + \
 	'from GXD_AlleleGenotype ' + \
-	'where _Allele_key = %s' % (objectKey), None)
+	'where _Allele_key = %s' % (objectKey)
 
+    db.sql(cmd, None)
     db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
 
     process('sql')
@@ -243,8 +244,11 @@ def process(mode):
 	    genotypes[key] = []
         genotypes[key].append(r)
 
+    counter = 1
+
     for g in genotypes.keys():
 
+        print counter, g
         foundTop = 0
         foundBottom = 0
 
@@ -413,6 +417,8 @@ def process(mode):
             fp1.write(r['genotypeID'] + reportlib.TAB + displayNotes1 + reportlib.CRT)
             fp2.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
             fp3.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
+
+	counter = counter + 1
 
     if mode == 'bcp':
         reportlib.finish_nonps(fp1)     # non-postscript file
