@@ -244,11 +244,15 @@ def process(mode):
 	    genotypes[key] = []
         genotypes[key].append(r)
 
-    counter = 1
+    print '\n\nGenotypes returned:'
+    print genotypes
+    sys.stdout.flush()
 
     for g in genotypes.keys():
 
-        print counter, g
+        print '\n', genotypes[g]
+	sys.stdout.flush()
+
         foundTop = 0
         foundBottom = 0
 
@@ -418,8 +422,6 @@ def process(mode):
             fp2.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
             fp3.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
 
-	counter = counter + 1
-
     if mode == 'bcp':
         reportlib.finish_nonps(fp1)     # non-postscript file
         reportlib.finish_nonps(fp2)     # non-postscript file
@@ -463,7 +465,7 @@ if server is None or \
 
 db.set_sqlLogin(user, password, server, database)
 db.useOneConnection(1)
-db.set_sqlLogFunction(db.sqlLogAll)
+#db.set_sqlLogFunction(db.sqlLogAll)
 
 userKey = loadlib.verifyUser(user, 0, None)
 
