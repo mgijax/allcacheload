@@ -55,6 +55,8 @@ combNoteType1 = 1016
 combNoteType2 = 1017
 combNoteType3 = 1018
 
+DEBUG = 0
+
 def showUsage():
 	'''
 	#
@@ -97,6 +99,10 @@ def processByAllele(objectKey):
     # Assumes:
     # Effects:
     # Throws:
+
+    global DEBUG
+
+    DEBUG = 1
 
     # select all Genotypes of a specified Allele
 
@@ -244,14 +250,11 @@ def process(mode):
 	    genotypes[key] = []
         genotypes[key].append(r)
 
-    print '\n\nGenotypes returned:'
-    print genotypes
-    sys.stdout.flush()
-
     for g in genotypes.keys():
 
-        print '\n', genotypes[g]
-	sys.stdout.flush()
+	if DEBUG:
+        	print '\nrunning allele combination for genotype\n', genotypes[g]
+		sys.stdout.flush()
 
         foundTop = 0
         foundBottom = 0
@@ -421,6 +424,14 @@ def process(mode):
             fp1.write(r['genotypeID'] + reportlib.TAB + displayNotes1 + reportlib.CRT)
             fp2.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
             fp3.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
+
+	if DEBUG:
+       	    print 'finished with genotype\n'
+	    sys.stdout.flush()
+
+    if DEBUG:
+        print '\nfinished running allele combination\n'
+        sys.stdout.flush()
 
     if mode == 'bcp':
         reportlib.finish_nonps(fp1)     # non-postscript file
