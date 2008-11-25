@@ -194,12 +194,24 @@ def process(mode):
 
     # delete existiing Allele Combination notes for Genotypes we're processing
 
+    if DEBUG:
+        print '\ndeleting existing allele combination\n', genotypes[g]
+	sys.stdout.flush()
+
     db.sql('delete MGI_Note from #toprocess p, MGI_Note n ' + \
 	'where p._Genotype_key = n._Object_key ' + \
 	'and n._MGIType_key = %s ' % (mgiTypeKey) + \
 	'and n._NoteType_key in (%s,%s,%s)' % (combNoteType1, combNoteType2, combNoteType3), None)
 
+    if DEBUG:
+        print 'finished deleting existing allele combination\n', genotypes[g]
+	sys.stdout.flush()
+
     # read in appropriate records
+
+    if DEBUG:
+        print '\nselecting existing allele combination\n', genotypes[g]
+	sys.stdout.flush()
 
     results = db.sql('select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, ' +
 	    'allele1WildType = a1.isWildType, allele2WildType = a2.isWildType, ' + \
@@ -241,6 +253,14 @@ def process(mode):
 	    'and g._Marker_key = m._Marker_key ' + \
 	    'order by p._Genotype_key, g.sequenceNum', 'auto')
 
+    if DEBUG:
+        print 'finished selecting existing allele combination\n', genotypes[g]
+	sys.stdout.flush()
+
+    if DEBUG:
+        print '\nputting existing allele combination into a list\n', genotypes[g]
+	sys.stdout.flush()
+
     genotypes = {}
     for r in results:
         key = r['_Genotype_key']
@@ -249,6 +269,10 @@ def process(mode):
         if not genotypes.has_key(key):
 	    genotypes[key] = []
         genotypes[key].append(r)
+
+    if DEBUG:
+        print 'finished putting existing allele combination into a list\n', genotypes[g]
+	sys.stdout.flush()
 
     for g in genotypes.keys():
 
