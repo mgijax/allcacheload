@@ -271,7 +271,7 @@ def process(mode):
         genotypes[key].append(r)
 
     if DEBUG:
-        print 'finished putting existing allele combination into a list\n', genotypes[g]
+        print 'finished putting existing allele combination into a list\n'
 	sys.stdout.flush()
 
     for g in genotypes.keys():
