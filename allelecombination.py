@@ -195,7 +195,7 @@ def process(mode):
     # delete existiing Allele Combination notes for Genotypes we're processing
 
     if DEBUG:
-        print '\ndeleting existing allele combination\n', genotypes[g]
+        print '\ndeleting existing allele combination\n'
 	sys.stdout.flush()
 
     db.sql('delete MGI_Note from #toprocess p, MGI_Note n ' + \
@@ -204,13 +204,13 @@ def process(mode):
 	'and n._NoteType_key in (%s,%s,%s)' % (combNoteType1, combNoteType2, combNoteType3), None)
 
     if DEBUG:
-        print 'finished deleting existing allele combination\n', genotypes[g]
+        print 'finished deleting existing allele combination\n'
 	sys.stdout.flush()
 
     # read in appropriate records
 
     if DEBUG:
-        print '\nselecting existing allele combination\n', genotypes[g]
+        print '\nselecting existing allele combination\n'
 	sys.stdout.flush()
 
     results = db.sql('select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, ' +
@@ -254,11 +254,11 @@ def process(mode):
 	    'order by p._Genotype_key, g.sequenceNum', 'auto')
 
     if DEBUG:
-        print 'finished selecting existing allele combination\n', genotypes[g]
+        print 'finished selecting existing allele combination\n'
 	sys.stdout.flush()
 
     if DEBUG:
-        print '\nputting existing allele combination into a list\n', genotypes[g]
+        print '\nputting existing allele combination into a list\n'
 	sys.stdout.flush()
 
     genotypes = {}
