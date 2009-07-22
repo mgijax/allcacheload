@@ -1,7 +1,13 @@
+TAG: allcacheload-4-3-0-2
+DATE: 07/22/2009
+STAFF: lec
+CHANGES: TR7493/gene trapped less filling: allelecombination.py
+needs to allow selection of null markers
+
 TAG: allcacheload-4-3-0-1
 DATE: 07/16/2009
 STAFF: lec
-CHANGES: TR7493/gene trapped less filling: allstrain.py, allstrian.csh
+CHANGES: TR7493/gene trapped less filling: allstrain.py, allstrain.csh
 
 TAG: allcacheload-4-1-2-6
 TAG: allcacheload-4-1-2-5

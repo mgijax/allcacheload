@@ -37,6 +37,8 @@
 #
 # Modification History:
 #
+# 07/22/2009	lec
+#	- TR 7493; allow selection of null marker in def process()
 #
 
 import sys 
@@ -213,48 +215,51 @@ def process(mode):
         print '\nselecting existing allele combination\n'
 	sys.stdout.flush()
 
-    results = db.sql('select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, ' +
-	    'allele1WildType = a1.isWildType, allele2WildType = a2.isWildType, ' + \
-	    'mgiID1 = c1.accID, mgiID2 = c2.accID, g.sequenceNum, m.chromosome ' + \
-	    'from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, ' + \
-	    'ACC_Accession c1, ACC_Accession c2, MRK_Marker m ' + \
-	    'where p._Genotype_key = g._Genotype_key ' + \
-	    'and g._PairState_key = t1._Term_key ' + \
-	    'and g._Compound_key = t2._Term_key ' + \
-	    'and g._Allele_key_1 = a1._Allele_key ' + \
-	    'and g._Allele_key_2 = a2._Allele_key ' + \
-	    'and g._Allele_key_1 = c1._Object_key ' + \
-	    'and c1._MGIType_key = 11 ' + \
-	    'and c1._LogicalDB_key = 1 ' + \
-	    'and c1.prefixPart = "MGI:" ' + \
-	    'and c1.preferred = 1 ' + \
-	    'and g._Allele_key_2 = c2._Object_key ' + \
-	    'and c2._MGIType_key = 11 ' + \
-	    'and c2._LogicalDB_key = 1 ' + \
-	    'and c2.prefixPart = "MGI:" ' + \
-	    'and c2.preferred = 1 ' + \
-	    'and g._Marker_key = m._Marker_key ' + \
-	    'union ' + \
-	    'select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = null, ' + \
-	    'allele1WildType = a1.isWildType, allele2WildType = 0, ' + \
-	    'mgiID1 = c1.accID, mgiID2 = null, g.sequenceNum, m.chromosome ' + \
-	    'from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ' + \
-	    'ACC_Accession c1, MRK_Marker m ' + \
-	    'where p._Genotype_key = g._Genotype_key ' + \
-	    'and g._PairState_key = t1._Term_key ' + \
-	    'and g._Compound_key = t2._Term_key ' + \
-	    'and g._Allele_key_1 = a1._Allele_key ' + \
-	    'and g._Allele_key_2 is null ' + \
-	    'and g._Allele_key_1 = c1._Object_key ' + \
-	    'and c1._MGIType_key = 11 ' + \
-	    'and c1._LogicalDB_key = 1 ' + \
-	    'and c1.prefixPart = "MGI:" ' + \
-	    'and c1.preferred = 1 ' + \
-	    'and g._Marker_key = m._Marker_key ' + \
-	    'order by p._Genotype_key, g.sequenceNum', 'auto')
+    cmd = '''select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = a2.symbol, 
+	    allele1WildType = a1.isWildType, allele2WildType = a2.isWildType, 
+	    mgiID1 = c1.accID, mgiID2 = c2.accID, g.sequenceNum, m.chromosome 
+	    from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, 
+	    ACC_Accession c1, ACC_Accession c2, MRK_Marker m 
+	    where p._Genotype_key = g._Genotype_key 
+	    and g._PairState_key = t1._Term_key 
+	    and g._Compound_key = t2._Term_key 
+	    and g._Allele_key_1 = a1._Allele_key 
+	    and g._Allele_key_2 = a2._Allele_key 
+	    and g._Allele_key_1 = c1._Object_key 
+	    and c1._MGIType_key = 11 
+	    and c1._LogicalDB_key = 1 
+	    and c1.prefixPart = "MGI:" 
+	    and c1.preferred = 1 
+	    and g._Allele_key_2 = c2._Object_key 
+	    and c2._MGIType_key = 11 
+	    and c2._LogicalDB_key = 1 
+	    and c2.prefixPart = "MGI:" 
+	    and c2.preferred = 1 
+	    and g._Marker_key *= m._Marker_key 
+	    union 
+	    select p.*, alleleState = t1.term, compound = t2.term, allele1 = a1.symbol, allele2 = null, 
+	    allele1WildType = a1.isWildType, allele2WildType = 0, 
+	    mgiID1 = c1.accID, mgiID2 = null, g.sequenceNum, m.chromosome 
+	    from #toprocess p, GXD_AllelePair g, VOC_Term t1, VOC_Term t2, ALL_Allele a1, 
+	    ACC_Accession c1, MRK_Marker m 
+	    where p._Genotype_key = g._Genotype_key 
+	    and g._PairState_key = t1._Term_key 
+	    and g._Compound_key = t2._Term_key 
+	    and g._Allele_key_1 = a1._Allele_key 
+	    and g._Allele_key_2 is null 
+	    and g._Allele_key_1 = c1._Object_key 
+	    and c1._MGIType_key = 11 
+	    and c1._LogicalDB_key = 1 
+	    and c1.prefixPart = "MGI:" 
+	    and c1.preferred = 1 
+	    and g._Marker_key *= m._Marker_key
+	    order by p._Genotype_key, g.sequenceNum'''
+
+    results = db.sql(cmd, 'auto')
 
     if DEBUG:
         print 'finished selecting existing allele combination\n'
+	print str(results)
 	sys.stdout.flush()
 
     if DEBUG:
