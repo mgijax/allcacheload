@@ -1,3 +1,9 @@
+TAG: allcacheload-4-3-0-3
+DATE: 08/27/2009
+STAFF: lec
+CHANGES: 
+allstrain.py: add mutant cell line strain != parent cell line strain
+
 TAG: allcacheload-4-3-0-2
 DATE: 07/22/2009
 STAFF: lec

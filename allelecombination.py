@@ -515,17 +515,24 @@ scriptName = os.path.basename(sys.argv[0])
 
 # all of these invocations will only affect a certain subset of data
 
-if scriptName == 'allelecombination.py':
-    processAll()
+try:
 
-elif scriptName == 'allelecombinationByAllele.py':
-    processByAllele(objectKey)
+    if scriptName == 'allelecombination.py':
+        processAll()
 
-elif scriptName == 'allelecombinationByMarker.py':
-    processByMarker(objectKey)
+    elif scriptName == 'allelecombinationByAllele.py':
+        processByAllele(objectKey)
 
-elif scriptName == 'allelecombinationByGenotype.py':
-    processByGenotype(objectKey)
+    elif scriptName == 'allelecombinationByMarker.py':
+        processByMarker(objectKey)
 
+    elif scriptName == 'allelecombinationByGenotype.py':
+        processByGenotype(objectKey)
+
+except:
+
+    print 'finished deleting existing allele combination\n'
+    sys.stdout.flush()
+    
 db.useOneConnection(0)
 

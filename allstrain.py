@@ -33,6 +33,10 @@
 #
 # Modification History:
 #
+# 08/27/2009	lec
+#	- add mutant cell line strain != parent cell line strain to reports and update
+#	- added "doDelete" to remove defunct mutant cell lines
+#
 # 07/14/2009	lec
 #	- QA#2260, TR7493 (gene trapped less filling)
 #	- this was originally coded in the ALL_CellLine trigger
@@ -53,11 +57,10 @@ TAB = reportlib.TAB
 PAGE = reportlib.PAGE
 
 def showUsage():
-	'''
+	
 	#
 	# Purpose: Displays the correct usage of this program and exits
 	#
-	'''
  
 	usage = 'usage: %s\n' % sys.argv[0] + \
 		'-S server\n' + \
@@ -68,12 +71,67 @@ def showUsage():
 	sys.stderr.write(usage)
 	sys.exit(1)
  
+def selectData():
+
+	#
+	# select all alleles where:
+	#
+	#	allele SOO != parent cell line strain
+	#
+	#	exclude parent cell lines:
+	#		Not Specified
+	#		Other (see notes)
+	#
+
+	cmd = '''select a._Allele_key, symbol = substring(a.symbol,1,35),
+		sooKey = a._Strain_key, alleleStrain = substring(s1.strain,1,25), 
+		parentKey = cc._Strain_key, parentStrain = substring(s2.strain,1,25), 
+		parentCellLine = substring(cc.cellLine,1,25)
+		into #toUpdate1
+		from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
+		PRB_Strain s1, PRB_Strain s2
+		where a._Allele_key = mc._Allele_key
+		and mc._MutantCellLine_key = c._CellLine_key
+		and c._Derivation_key = d._Derivation_key
+		and d._ParentCellLine_key = cc._CellLine_key
+		and a._Strain_key != cc._Strain_key
+		and a._Strain_key = s1._Strain_key
+		and cc._Strain_key = s2._Strain_key
+		and cc.cellLine not in ("Not Specified", "Other (see notes)")
+		'''
+
+	db.sql(cmd, None)
+
+	#
+	# select mutant cell line strain != parent cell line strain
+	#
+
+	cmd = '''select symbol = substring(a.symbol,1,35),
+		mutantCellLineKey = c._CellLine_key,
+		mutantCellLine = substring(c.cellLine,1,25),
+		mutantKey = c._Strain_key, mutantStrain = substring(s1.strain,1,25), 
+		parentKey = cc._Strain_key, parentStrain = substring(s2.strain,1,25), 
+		parentCellLine = substring(cc.cellLine,1,25)
+		into #toUpdate2
+		from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
+		PRB_Strain s1, PRB_Strain s2
+		where a._Allele_key = mc._Allele_key
+		and mc._MutantCellLine_key = c._CellLine_key
+		and c._Derivation_key = d._Derivation_key
+		and d._ParentCellLine_key = cc._CellLine_key
+		and c._Strain_key != cc._Strain_key
+		and c._Strain_key = s1._Strain_key
+		and cc._Strain_key = s2._Strain_key
+		and cc.cellLine not in ("Not Specified")
+		'''
+
+	db.sql(cmd, None)
+
 def qcreport():
-	'''
+	
 	#
 	# Generate a QC report for the Pheno group
 	#
-	'''
 
 	fp = reportlib.init('allstrain', 'Allele Strain of Origin vs. Parent Cell Line Strain', os.environ['QCOUTPUTDIR'])
 
@@ -93,7 +151,7 @@ def qcreport():
 	fp.write(string.ljust('---------', 10) + TAB)
 	fp.write(string.ljust('------------', 25) + CRT*2)
 
-	results = db.sql('select * from #toUpdate order by sooKey, parentStrain', 'auto')
+	results = db.sql('select * from #toUpdate1 order by sooKey, parentStrain', 'auto')
 	for r in results:
 
 	    fp.write(string.ljust(r['symbol'], 35) + TAB)
@@ -103,24 +161,96 @@ def qcreport():
 	    fp.write(string.ljust(str(r['parentKey']), 10) + TAB)
 	    fp.write(string.ljust(r['parentStrain'], 25) + CRT)
 
-	fp.write('\n(%d rows affected)\n' % (len(results)))
+	fp.write('\n(%d rows affected)\n\n' % (len(results)))
+
+	#
+	# mutant cell line strain vs. parent cell line strain
+	#
+
+	fp.write('Mutant Cell Line Strain vs. Parent Cell Line Strain' + CRT*2)
+	fp.write('this report excludes parent cell lines:  "Not Specified"' + CRT*2)
+
+	fp.write(string.ljust('symbol', 35) + TAB)
+	fp.write(string.ljust('mutantCellLine', 25) + TAB)
+	fp.write(string.ljust('parentCellLine', 25) + TAB)
+	fp.write(string.ljust('mutantKey', 10) + TAB)
+	fp.write(string.ljust('mutantStrain', 25) + TAB)
+	fp.write(string.ljust('parentKey', 10) + TAB)
+	fp.write(string.ljust('parentStrain', 25) + CRT)
+
+	fp.write(string.ljust('------', 35) + TAB)
+	fp.write(string.ljust('--------------', 25) + TAB)
+	fp.write(string.ljust('--------------', 25) + TAB)
+	fp.write(string.ljust('---------', 10) + TAB)
+	fp.write(string.ljust('------------', 25) + TAB)
+	fp.write(string.ljust('---------', 10) + TAB)
+	fp.write(string.ljust('------------', 25) + CRT*2)
+
+	results = db.sql('select * from #toUpdate2 order by mutantKey, parentStrain', 'auto')
+	for r in results:
+
+	    fp.write(string.ljust(r['symbol'], 35) + TAB)
+	    fp.write(string.ljust(r['mutantCellLine'], 25) + TAB)
+	    fp.write(string.ljust(r['parentCellLine'], 25) + TAB)
+	    fp.write(string.ljust(str(r['mutantKey']), 10) + TAB)
+	    fp.write(string.ljust(r['mutantStrain'], 25) + TAB)
+	    fp.write(string.ljust(str(r['parentKey']), 10) + TAB)
+	    fp.write(string.ljust(r['parentStrain'], 25) + CRT)
+
+	fp.write('\n(%d rows affected)\n\n' % (len(results)))
 
 def doUpdate():
-	'''
+	
 	#
-	# Run the update
+	# set SOO = parent cell line strain
 	#
-	'''
 
-	db.sql('create index idx_allele on #toUpdate(_Allele_key)', None)
+
+	db.sql('create index idx_allele on #toUpdate1(_Allele_key)', None)
 
 	updateSQL = '''update ALL_Allele
 			set _Strain_key = t.parentKey
-			from #toUpdate t, ALL_Allele a
+			from #toUpdate1 t, ALL_Allele a
 			where t._Allele_key = a._Allele_key
 			'''
 
 	db.sql(updateSQL, None)
+
+	#
+	# mutant cell line strain = parent cell line strain
+	# db.py does not like alter table, so run the udpates manually for now
+	# 
+	#
+
+	#db.sql('alter table ALL_CellLine disable trigger', None)
+
+	#db.sql('create index idx_mutnatCellLineKey on #toUpdate2(mutantCellLineKey)', None)
+
+	#updateSQL = '''update ALL_CellLine
+	#		set _Strain_key = t.parentKey
+	#		from #toUpdate2 t, ALL_CellLine a
+	#		where t.mutantCellLineKey = a._CellLine_key
+	#		'''
+
+	#db.sql(updateSQL, None)
+
+	#db.sql('alter table ALL_CellLine enable trigger', None)
+
+def doDelete():
+	
+	#
+	# remove defunct 'not specified' mutant cell lines
+	#
+
+
+	deleteSQL = '''delete ALL_CellLine 
+		from ALL_CellLine a
+		where a.cellLine = "Not Specified"
+		and a.isMutant = 1
+		and not exists (select 1 from ALL_Allele_CellLine c where a._CellLine_key = c._MutantCellLine_key)
+		'''
+
+	db.sql(deleteSQL, None)
 
 #
 # Main Routine
@@ -158,40 +288,17 @@ db.set_sqlLogin(user, password, server, database)
 db.useOneConnection(1)
 db.set_sqlLogFunction(db.sqlLogAll)
 
-#
-# select all alleles where:
-#
-#	allele SOO != parent cell line strain
-#
-#	exclude parent cell lines:
-#		Not Specified
-#		Other (see notes)
-#
+# select all alleles...
+selectData()
 
-cmd = '''select a._Allele_key, symbol = substring(a.symbol,1,35),
-	sooKey = a._Strain_key, alleleStrain = substring(s1.strain,1,25), 
-	parentKey = cc._Strain_key, parentStrain = substring(s2.strain,1,25), 
-	parentCellLine = substring(cc.cellLine,1,25)
-	into #toUpdate
-	from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
-	PRB_Strain s1, PRB_Strain s2
-	where a._Allele_key = mc._Allele_key
-	and mc._MutantCellLine_key = c._CellLine_key
-	and c._Derivation_key = d._Derivation_key
-	and d._ParentCellLine_key = cc._CellLine_key
-	and a._Strain_key != cc._Strain_key
-	and a._Strain_key = s1._Strain_key
-	and cc._Strain_key = s2._Strain_key
-	and cc.cellLine not in ("Not Specified", "Other (see notes)")
-	'''
-
-db.sql(cmd, None)
-
-# run the qc report
+# run the qc reports
 qcreport()
 
 # execute the update
 doUpdate()
+
+# remove defunct 'not specified' mutant cell lines
+doDelete()
 
 db.useOneConnection(0)
 
