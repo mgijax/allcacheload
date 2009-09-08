@@ -29,7 +29,15 @@ if ( ! -d ${ALLCACHELOGDIR} ) then
 	mkdir -p ${ALLCACHELOGDIR}
 endif
 
+#
+# create links for allele combinations
+#
 ln -s allelecombination.py allelecombinationByAllele.py
 ln -s allelecombination.py allelecombinationByMarker.py
 ln -s allelecombination.py allelecombinationByGenotype.py
 
+#
+# create links for allele cre
+#
+ln -s allelecrecache.py allelecrecacheByAllele.py
+ln -s allelecrecache.py allelecrecacheByAssay.py
