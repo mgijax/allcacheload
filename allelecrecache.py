@@ -66,14 +66,13 @@ import loadlib
 import reportlib
 import mgi_utils
 
-COLDL = os.environ['COLDELIM']
+COLDL = '"&#&"'
 LINEDL = '\n'
-outputDir = os.environ['ALLCACHEBCPDIR']
 
 userKey = 0
 loaddate = loadlib.loaddate
 
-# select Cre alleles that have genotypes/structures information
+# select Cre alleles that have genotype/structure information
 
 querySQL1 = '''
         select distinct
@@ -110,7 +109,7 @@ querySQL1 = '''
           and n._NoteType_key = 1034
 	'''
 
-# select those Cre alleles that have no structure information
+# select Cre alleles that have no genotype/structure information
 
 querySQL2 = '''
 	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, nc.note
@@ -124,6 +123,7 @@ querySQL2 = '''
 
 #is there a query 2?  default = true (1)
 isQuerySQL2 = 1
+
 deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
@@ -205,7 +205,7 @@ def process(mode):
     db.sql('create index idx1 on #toprocess2(_Allele_key)', None)
 
     if mode == 'bcp':
-       outBCP = open(outputDir + '/ALL_Cre_Cache.bcp', 'w')
+       outBCP = open(os.environ['ALLCACHEBCPDIR'] + '/ALL_Cre_Cache.bcp', 'w')
     else:
 	db.sql(deleteSQL, None)
 

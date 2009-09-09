@@ -259,7 +259,7 @@ def process(mode):
 
     if DEBUG:
         print 'finished selecting existing allele combination\n'
-	print str(results)
+	#print str(results)
 	sys.stdout.flush()
 
     if DEBUG:
