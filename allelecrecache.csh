@@ -20,6 +20,10 @@ touch $LOG
 
 date | tee -a ${LOG}
 
+# Run the ad system loader
+
+${ADSYSTEMLOAD}/adsystemload.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
+
 # Create the bcp file
 
 ./allelecrecache.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} -K${OBJECTKEY} | tee -a ${LOG}

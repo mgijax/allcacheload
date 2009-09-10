@@ -66,7 +66,7 @@ import loadlib
 import reportlib
 import mgi_utils
 
-COLDL = '"&#&"'
+COLDL = '&#&'
 LINEDL = '\n'
 
 userKey = 0
