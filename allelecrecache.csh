@@ -39,9 +39,9 @@ date | tee -a ${LOG}
 #   . high activity
 #   . the EI:AD module:"Refresh AD System Terms" is NOT being run AFTER an AST modification
 #
-# for the iniital TR9797/TR9163, we are setting this to OFF
+# for the iniital TR9797/TR9163, we are setting this to ON
 #
-#${ADSYSTEMLOAD}/adsystemload.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
+${ADSYSTEMLOAD}/adsystemload.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
 
 # Create the bcp file
 
