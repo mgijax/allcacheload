@@ -83,9 +83,10 @@ querySQL1 = '''
           e._Assay_key,
           aa.symbol,
           aa.name,
+	  alleleType = t1.term,
           nc.note,
           sn.structure,
-          vt.term,
+          system = t2.term,
           e.expressed
 	into #toprocess1
         from 
@@ -93,7 +94,8 @@ querySQL1 = '''
           GXD_AlleleGenotype ag, 
           GXD_Structure s, 
           GXD_StructureName sn, 
-          VOC_Term vt,
+          VOC_Term t1,
+          VOC_Term t2,
           MGI_Note n,
           MGI_NoteChunk nc,
           ALL_Allele aa
@@ -101,9 +103,10 @@ querySQL1 = '''
           and e._GenoType_key = ag._GenoType_key
           and e._Marker_key = ag._Marker_key
           and ag._Allele_key = aa._Allele_key
+          and aa._Allele_Type_key = t1._Term_key
           and e._Structure_key = s._Structure_key
           and s._StructureName_key = sn._StructureName_key
-          and s._System_key = vt._Term_key
+          and s._System_key = t2._Term_key
           and ag._Allele_key = n._Object_key
           and n._Note_key = nc._Note_key
           and n._NoteType_key = 1034
@@ -112,10 +115,11 @@ querySQL1 = '''
 # select Cre alleles that have no genotype/structure information
 
 querySQL2 = '''
-	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, nc.note
+	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, alleleType = t1.term, nc.note
 	into #toprocess2
-	from ALL_Allele aa, MGI_Note n, MGI_NoteChunk nc
-	where aa._Allele_key = n._Object_key
+	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc
+	where aa._Allele_Type_key = t1._Term_key
+	and aa._Allele_key = n._Object_key
       	and n._NoteType_key = 1034
     	and n._Note_key = nc._Note_key
 	and not exists (select 1 from #toprocess1 t where aa._Allele_key = t._Allele_key)
@@ -128,8 +132,8 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s",%s,%s,%s,getdate(),getdate())'
-insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,null,null,null,"%s","%s","%s",null,null,null,%s,%s,getdate(),getdate())'
+insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s",%s,%s,%s,getdate(),getdate())'
+insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,null,null,null,"%s","%s","%s","%s",null,null,null,%s,%s,getdate(),getdate())'
 
 def showUsage():
 	'''
@@ -220,9 +224,10 @@ def process(mode):
 		               r['_Assay_key'],
 		               r['symbol'],
 		               r['name'],
+		               r['alleleType'],
 		               r['note'],
 		               r['structure'],
-		               r['term'],
+		               r['system'],
 		               r['expressed'],
 		               userKey, userKey), None)
         else:
@@ -233,9 +238,10 @@ def process(mode):
 		     mgi_utils.prvalue(r['_Assay_key']) + COLDL +
 		     mgi_utils.prvalue(r['symbol']) + COLDL +
 		     mgi_utils.prvalue(r['name']) + COLDL +
+		     mgi_utils.prvalue(r['alleleType']) + COLDL +
 		     mgi_utils.prvalue(r['note']) + COLDL +
 		     mgi_utils.prvalue(r['structure']) + COLDL +
-		     mgi_utils.prvalue(r['term']) + COLDL +
+		     mgi_utils.prvalue(r['system']) + COLDL +
 		     mgi_utils.prvalue(r['expressed']) + COLDL +
 		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		     loaddate + COLDL + loaddate + LINEDL)
@@ -254,6 +260,7 @@ def process(mode):
                                    r['_Allele_Type_key'],
 		                   r['symbol'],
 		                   r['name'],
+		                   r['alleleType'],
 		                   r['note'],
 		                   userKey, userKey), None)
             else:
@@ -264,6 +271,7 @@ def process(mode):
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue(r['symbol']) + COLDL +
 		         mgi_utils.prvalue(r['name']) + COLDL +
+		         mgi_utils.prvalue(r['alleleType']) + COLDL +
 		         mgi_utils.prvalue(r['note']) + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +

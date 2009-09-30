@@ -219,7 +219,7 @@ def doUpdate():
 	#
 	# mutant cell line strain = parent cell line strain
 	# db.py does not like alter table, so run the udpates manually for now
-	# 
+	# TR9776/adds trigger/disable_triggers/enable_triggers
 	#
 
 	#db.sql('alter table ALL_CellLine disable trigger', None)
