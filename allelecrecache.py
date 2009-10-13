@@ -73,6 +73,7 @@ userKey = 0
 loaddate = loadlib.loaddate
 
 # select Cre alleles that have genotype/structure information
+# status = approved, autoload ONLY
 
 querySQL1 = '''
         select distinct
@@ -103,6 +104,7 @@ querySQL1 = '''
           and e._GenoType_key = ag._GenoType_key
           and e._Marker_key = ag._Marker_key
           and ag._Allele_key = aa._Allele_key
+	  and aa._Allele_Status_key in (847114, 3983021)
           and aa._Allele_Type_key = t1._Term_key
           and e._Structure_key = s._Structure_key
           and s._StructureName_key = sn._StructureName_key
@@ -113,12 +115,14 @@ querySQL1 = '''
 	'''
 
 # select Cre alleles that have no genotype/structure information
+# status = approved, autoload ONLY
 
 querySQL2 = '''
 	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, alleleType = t1.term, nc.note
 	into #toprocess2
 	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc
-	where aa._Allele_Type_key = t1._Term_key
+	where aa._Allele_Status_key in (847114, 3983021)
+	and aa._Allele_Type_key = t1._Term_key
 	and aa._Allele_key = n._Object_key
       	and n._NoteType_key = 1034
     	and n._Note_key = nc._Note_key
