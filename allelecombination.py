@@ -37,6 +37,9 @@
 #
 # Modification History:
 #
+# 12/16/2009	lec
+#	- TR9871/by genotype should query by GXD_Genotype; not every Genotype will have an Allele
+#	  
 # 07/22/2009	lec
 #	- TR 7493; allow selection of null marker in def process()
 #
@@ -144,7 +147,7 @@ def processByGenotype(objectKey):
     # select all Genotypes of a specified Genotype
 
     db.sql('select distinct _Genotype_key into #toprocess ' + \
-	'from GXD_AlleleGenotype ' + \
+	'from GXD_Genotype ' + \
 	'where _Genotype_key = %s' % (objectKey), None)
 
     db.sql('create index idx1 on #toprocess(_Genotype_key)', None)

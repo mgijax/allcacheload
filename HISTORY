@@ -1,3 +1,8 @@
+TAG: allcacheload-4-3-2-1
+DATE: 12/16/2009
+STAFF: lec
+CHANGES: TR9871/ByGenotype needs to query by GXD_Genotype NOT GEX_AlleleGenotype
+
 TAG: allcacheload-4-3-1-1
 TAG: allcacheload-4-3-0-8
 TAG: allcacheload-4-3-0-7
