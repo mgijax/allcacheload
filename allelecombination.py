@@ -9,6 +9,17 @@
 #
 # To create MGI_Note, MGI_NoteChunk objects for Allele Combinations
 #
+# displayNotes1
+# _NoteType_key = 1016
+# this is the display that shows up in the EI
+# this is = displayNotes2 without the linkout flags
+#
+# displayNotes2
+# _NoteType_key = 1017, 1018
+# this is = displayNotes1 with the linkout flags
+# displays on the Phenotypic Allele Detail page in the WI
+# displays on the Phenotypic Allele Summary page in the WI
+#
 # Requirements Satisfied by This Program:
 #
 # Usage:
@@ -19,23 +30,17 @@
 #	allelecombinationByMarker.py markerObjectKey
 #		- process Allele Combinations for given Marker
 #
-# Envvars:
-#
-# Inputs:
-#
-# Outputs:
-#
-# Exit Codes:
-#
-# Assumes:
-#
-# Bugs:
-#
 # Implementation:
 #
 #    Modules:
 #
 # Modification History:
+#
+# 08/25/2010	lec
+#	- TR10255
+#         process X-linked/Y-linked displays
+#	  removed displayNotes3; this was not being used
+#	  displayNotes2 is being used for both 1017 & 1018 (detail & summary WI pages)
 #
 # 12/16/2009	lec
 #	- TR9871/by genotype should query by GXD_Genotype; not every Genotype will have an Allele
@@ -293,7 +298,6 @@ def process(mode):
 
         displayNotes1 = ''
         displayNotes2 = ''
-        displayNotes3 = ''
 
         topType1 = ''
         topType2 = ''
@@ -302,6 +306,33 @@ def process(mode):
         bottomType1 = ''
         bottomType2 = ''
         bottomType3 = ''
+
+	# if alleleStatue = 'Hemizygous X-linked' or 'Hemizygous Y-linked'
+	# appears more than once in a given genotype
+	# then set isCollapse = 1
+
+	isCollapseX = 0
+	isCollapseY = 0
+	xcounter = 0
+	ycounter = 0
+
+        for r in genotypes[g]:
+            alleleState = r['alleleState']
+
+            if alleleState == 'Hemizygous X-linked':
+		xcounter = xcounter + 1
+
+            if alleleState == 'Hemizygous Y-linked':
+		ycounter = ycounter + 1
+
+	if xcounter > 1:
+	    isCollapseX = 1
+	if ycounter > 1:
+	    isCollapseY = 1
+
+	#
+	# iterate thru each allele pair for this genotype
+	#
 
         for r in genotypes[g]:
 
@@ -317,7 +348,16 @@ def process(mode):
             allele2WildType = r['allele2WildType']
             mgiID2 = r['mgiID2']
 
-            if allele1WildType == 1:
+	    #
+	    # topType3, bottomType3 = "master" link-out text
+	    # the type2 display is created by attaching the appropriate type3 "master"
+	    #
+	    # type2 = ''
+	    # type2 = previous type2 + type3 (master)
+	    #
+
+            # only used for compound = 'Not Applicable'
+	    if allele1WildType == 1:
 	        topType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
 	    else:
 	        topType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
@@ -347,11 +387,76 @@ def process(mode):
 	            bottomType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
                 topType3 = 'X'
 
-            displayNotes3 = displayNotes3 + topType3 + '/' + bottomType3 + newline
-
 	    # if Allele Pair does not have a compound attribute
 
-            if compound == 'Not Applicable':
+            if alleleState == 'Hemizygous X-linked' and isCollapseX:
+
+		#
+		# collapse the row into one display
+		#
+		# MGI:3511894
+		# Maoa    Maoa<K284stop>  Hemizygous X-linked
+		# Maob    Maob<tm1Shih>   Hemizygous X-linked
+		#
+		# Display:
+		#
+		# Maoa<K284stop> Maob<tm1Shih>/Y
+		#
+
+                if foundTop >= 1:
+                    topType1 = topType1 + ' ' + allele1
+                    topType2 = topType2 + topType3
+                else:
+		    topType1 = allele1
+                    topType2 = topType3
+
+                bottomType1 = bottomType2 = bottomType3
+		topType3 = topType2
+		foundTop = foundTop + 1
+		foundBottom = foundBottom + 1
+
+            elif alleleState == 'Hemizygous Y-linked' and isCollapseY:
+
+		#
+		# collapse the row into one display
+		#
+		# MGI:3043585
+		# Del(Y)1Psb    Del(Y)1Psb	Hemizygous Y-linked
+		# Sry     	Sry<dl1Rlb>	Hemizygous Y-linked
+		# Tg(Sry)2Ei	Tg(Sry)2Ei	Hemizygous Insertion
+		#
+		# Display:
+		#
+		# X/Del(Y)1Psb Sry<dl1Rlb>
+		# Tg(Sry)2Ei/0
+		#
+
+                if foundBottom >= 1:
+                    bottomType1 = bottomType1 + ' ' + allele1
+                    bottomType2 = bottomType2 + bottomType3
+                else:
+		    bottomType1 = allele1
+	            bottomType2 = bottomType3
+
+                topType1 = topType2 = topType3
+		foundTop = foundTop + 1
+		foundBottom = foundBottom + 1
+
+            elif compound == 'Not Applicable':
+
+		#
+		# there is one display line per row
+		# each row gets its own unique display
+		#
+		# MGI:3776480
+		# Il2rg   Il2rg<tm1Cgn>   Hemizygous X-linked
+		# Rag2    Rag2<tm1Fwa>    Homozygous
+		#
+		# Display:
+		#
+		# Il2rg<tm1Cgn>/Y
+		# Rag2<tm1Fwa>/Rag2<tm1Fwa>
+		#
 
                 if foundTop >= 1 and foundBottom >= 1:
                     displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
@@ -416,28 +521,30 @@ def process(mode):
 
                 if foundBottom >= 1:
                     bottomType1 = bottomType1 + ' ' + allele1
-                    bottomType2 = bottomType2 + ' '
+		    bottomType2 = bottomType2 + ' '
 
-                    if allele1WildType == 1:
-	                bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
+		    if allele1WildType == 1:
+			bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
                     else:
-                        bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+			bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
 		# if there is no bottom, then copy in existing information
 
 		else:
                     bottomType1 = allele1
 
-                    if allele1WildType == 1:
-	                bottomType2 = '\AlleleSymbol(' + mgiID1 + '|0)'
+		    if allele1WildType == 1:
+			bottomType2 = '\AlleleSymbol(' + mgiID1 + '|0)'
                     else:
-                        bottomType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+			bottomType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 foundBottom = foundBottom + 1
 
-        if foundTop >=1 and foundBottom >= 1:
+        if foundTop >= 1 and foundBottom >= 1:
             displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
             displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
+	    #print displayNotes1
+	    #print displayNotes2
 
 	if mode == 'sql':
 	    #
@@ -449,7 +556,7 @@ def process(mode):
 
 	    cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
 	    cmd = cmd + processNote(g, displayNotes2, combNoteType2)
-	    cmd = cmd + processNote(g, displayNotes3, combNoteType3)
+	    cmd = cmd + processNote(g, displayNotes2, combNoteType3)
 	    db.sql(cmd, None)
 
         else:
