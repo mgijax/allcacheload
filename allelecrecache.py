@@ -53,6 +53,9 @@
 #
 # Modification History:
 #
+# 10/05/2010	lec
+#	- TR 10397/add 'global userKey'
+#
 # 09/02/2009	lec
 #	- TR 9797; new
 #
@@ -291,6 +294,7 @@ def process(mode):
 #
 
 def main():
+    global userKey
 
     try:
 	    optlist, args = getopt.getopt(sys.argv[1:], 'S:D:U:P:K:')
