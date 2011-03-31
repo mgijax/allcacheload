@@ -53,6 +53,9 @@
 #
 # Modification History:
 #
+# 03/31/2011	lec
+#	- TR 10658/added primary key to ALL_Cre_Cache
+#
 # 10/05/2010	lec
 #	- TR 10397/add 'global userKey'
 #
@@ -220,11 +223,25 @@ def process(mode):
     else:
 	db.sql(deleteSQL, None)
 
+    #
+    # next available primary key
+    #
+    
+    results = db.sql('select cacheKey = max(_Cache_key) from ALL_Cre_Cache', 'auto')
+    for r in results:
+	nextMaxKey = r['cacheKey']
+
+    if nextMaxKey == None:
+        nextMaxKey = 0
+
     results = db.sql('select * from #toprocess1', 'auto')
     for r in results:
 
+        nextMaxKey = nextMaxKey + 1
+
 	if mode == 'sql':
-	   db.sql(insertSQL1 % (r['_Allele_key'],
+	   db.sql(insertSQL1 % (str(nextMaxKey),
+			       r['_Allele_key'],
                                r['_Allele_Type_key'],
 		               r['_Structure_key'],
 		               r['_System_key'],
@@ -237,8 +254,10 @@ def process(mode):
 		               r['system'],
 		               r['expressed'],
 		               userKey, userKey), None)
+
         else:
-            outBCP.write(mgi_utils.prvalue(r['_Allele_key']) + COLDL +
+            outBCP.write(str(nextMaxKey) + COLDL +
+		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
 		     mgi_utils.prvalue(r['_Structure_key']) + COLDL +
 		     mgi_utils.prvalue(r['_System_key']) + COLDL +
@@ -262,8 +281,11 @@ def process(mode):
         results = db.sql('select * from #toprocess2', 'auto')
         for r in results:
 
+            nextMaxKey = nextMaxKey + 1
+
 	    if mode == 'sql':
-	       db.sql(insertSQL2 % (r['_Allele_key'],
+	       db.sql(insertSQL2 % (str(nextMaxKey) ,
+				   r['_Allele_key'],
                                    r['_Allele_Type_key'],
 		                   r['symbol'],
 		                   r['name'],
@@ -271,7 +293,8 @@ def process(mode):
 		                   r['note'],
 		                   userKey, userKey), None)
             else:
-                outBCP.write(mgi_utils.prvalue(r['_Allele_key']) + COLDL +
+                outBCP.write(str(nextMaxKey) + COLDL +
+			 mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
