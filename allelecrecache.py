@@ -227,12 +227,15 @@ def process(mode):
     # next available primary key
     #
     
-    results = db.sql('select cacheKey = max(_Cache_key) from ALL_Cre_Cache', 'auto')
-    for r in results:
-	nextMaxKey = r['cacheKey']
+    if mode == 'sql':
+        results = db.sql('select cacheKey = max(_Cache_key) from ALL_Cre_Cache', 'auto')
+        for r in results:
+	    nextMaxKey = r['cacheKey']
 
-    if nextMaxKey == None:
-        nextMaxKey = 0
+        if nextMaxKey == None:
+            nextMaxKey = 0
+    else:
+	nextMaxKey = 0
 
     results = db.sql('select * from #toprocess1', 'auto')
     for r in results:
