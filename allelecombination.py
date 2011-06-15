@@ -509,7 +509,6 @@ def process(mode):
                 # new top, new group: process old group
 
                 if foundBottom >= 1:
-		    print 'here: ', separatorTopBottom
                     displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + newline
                     displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + newline
                     topType1 = ''
@@ -561,8 +560,8 @@ def process(mode):
         if foundTop >= 1 and foundBottom >= 1:
             displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + newline
             displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + newline
-	    print displayNotes1
-	    print displayNotes2
+	    #print displayNotes1
+	    #print displayNotes2
 
 	if mode == 'sql':
 	    #
