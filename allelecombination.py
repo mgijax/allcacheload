@@ -36,6 +36,10 @@
 #
 # Modification History:
 #
+# 06/14/2011	lec
+#	- TR10404
+#	added Homoplasmic, Heterplasmic
+#
 # 08/25/2010	lec
 #	- TR10255
 #         process X-linked/Y-linked displays
@@ -348,6 +352,16 @@ def process(mode):
             allele2WildType = r['allele2WildType']
             mgiID2 = r['mgiID2']
 
+            if alleleState in ['Homoplasmic', 'Heteroplasmic'] and compound == 'Not Applicable':
+	        separatorTopBottom = ''
+		separatorBottom = ''
+            elif alleleState in ['Homoplasmic', 'Heteroplasmic']:
+	        separatorTopBottom = ', '
+		separatorBottom = ', '
+	    else:
+	        separatorTopBottom = '/'
+		separatorBottom = ' '
+
 	    #
 	    # topType3, bottomType3 = "master" link-out text
 	    # the type2 display is created by attaching the appropriate type3 "master"
@@ -379,6 +393,9 @@ def process(mode):
 
             elif alleleState == 'Indeterminate':
                 bottomType3 = '?'
+
+            elif alleleState in ['Homoplasmic', 'Heteroplasmic']:
+                bottomType3 = ''
 
             elif (alleleState == 'Hemizygous Y-linked') or (alleleState == 'Hemizygous Insertion' and chr == 'Y'):
 	        if allele1WildType == 1:
@@ -459,8 +476,8 @@ def process(mode):
 		#
 
                 if foundTop >= 1 and foundBottom >= 1:
-                    displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
-                    displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
+                    displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + newline
+                    displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + newline
                     topType1 = ''
                     topType2 = ''
                     bottomType1 = ''
@@ -484,16 +501,17 @@ def process(mode):
                 else:
                     bottomType1 = bottomType3
 
-                displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
-                displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
+                displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + newline
+                displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + newline
 
             elif compound == 'Top':
 
                 # new top, new group: process old group
 
                 if foundBottom >= 1:
-                    displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
-                    displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
+		    print 'here: ', separatorTopBottom
+                    displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + newline
+                    displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + newline
                     topType1 = ''
                     topType2 = ''
                     bottomType1 = ''
@@ -504,7 +522,7 @@ def process(mode):
                 # new top, same group: need space to separate tops + existing information
 
                 if foundTop >= 1:
-                    topType1 = topType1 + ' ' + allele1
+                    topType1 = topType1 + separatorBottom + allele1
                     topType2 = topType2 + ' \Allele(' + mgiID1 + '|' + allele1 + '|)'
 
 		# if there is no top, then copy in existing information
@@ -520,8 +538,8 @@ def process(mode):
                 # new bottom, same group: need space to separate bottoms + existing information
 
                 if foundBottom >= 1:
-                    bottomType1 = bottomType1 + ' ' + allele1
-		    bottomType2 = bottomType2 + ' '
+                    bottomType1 = bottomType1 + separatorBottom + allele1
+		    bottomType2 = bottomType2 + separatorBottom
 
 		    if allele1WildType == 1:
 			bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
@@ -541,10 +559,10 @@ def process(mode):
                 foundBottom = foundBottom + 1
 
         if foundTop >= 1 and foundBottom >= 1:
-            displayNotes1 = displayNotes1 + topType1 + '/' + bottomType1 + newline
-            displayNotes2 = displayNotes2 + topType2 + '/' + bottomType2 + newline
-	    #print displayNotes1
-	    #print displayNotes2
+            displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + newline
+            displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + newline
+	    print displayNotes1
+	    print displayNotes2
 
 	if mode == 'sql':
 	    #
