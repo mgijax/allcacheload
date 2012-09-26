@@ -14,7 +14,7 @@ endif
 source ${MGICONFIG}/master.config.csh
 
 # directory
-setenv ALLCACHEDIR		/data/loads/mgi/allcacheload
+setenv ALLCACHEDIR		${DATALOADSOUTPUT}/mgi/allcacheload
 
 # input directory
 setenv ALLCACHEINDIR		${ALLCACHEDIR}/input
