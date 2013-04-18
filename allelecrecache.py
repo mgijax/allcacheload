@@ -53,6 +53,9 @@
 #
 # Modification History:
 #
+# 04/18/2013	lec
+#	- TR11248/add 'age'
+#
 # 03/31/2011	lec
 #	- TR 10658/added primary key to ALL_Cre_Cache
 #
@@ -94,6 +97,9 @@ querySQL1 = '''
           nc.note,
           sn.structure,
           system = t2.term,
+	  e.age,
+	  e.ageMin,
+	  e.ageMax,
           e.expressed
 	into #toprocess1
         from 
@@ -255,6 +261,9 @@ def process(mode):
 		               r['note'],
 		               r['structure'],
 		               r['system'],
+		               r['age'],
+		               r['ageMin'],
+		               r['ageMax'],
 		               r['expressed'],
 		               userKey, userKey), None)
 
@@ -271,6 +280,9 @@ def process(mode):
 		     mgi_utils.prvalue(r['note']) + COLDL +
 		     mgi_utils.prvalue(r['structure']) + COLDL +
 		     mgi_utils.prvalue(r['system']) + COLDL +
+		     mgi_utils.prvalue(r['age']) + COLDL +
+		     mgi_utils.prvalue(r['ageMin']) + COLDL +
+		     mgi_utils.prvalue(r['ageMax']) + COLDL +
 		     mgi_utils.prvalue(r['expressed']) + COLDL +
 		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		     loaddate + COLDL + loaddate + LINEDL)
@@ -306,6 +318,9 @@ def process(mode):
 		         mgi_utils.prvalue(r['name']) + COLDL +
 		         mgi_utils.prvalue(r['alleleType']) + COLDL +
 		         mgi_utils.prvalue(r['note']) + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
