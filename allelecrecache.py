@@ -97,10 +97,12 @@ querySQL1 = '''
           nc.note,
           sn.structure,
           system = t2.term,
+	  s.printName,
 	  e.age,
 	  e.ageMin,
 	  e.ageMax,
-          e.expressed
+          e.expressed,
+	  e.hasImage
 	into #toprocess1
         from 
           GXD_Expression e, 
@@ -148,8 +150,8 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s",%s,%s,%s,getdate(),getdate())'
-insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s",null,null,null,%s,%s,getdate(),getdate())'
+insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,getdate(),getdate())'
+insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,getdate(),getdate())'
 
 def showUsage():
 	'''
@@ -261,10 +263,12 @@ def process(mode):
 		               r['note'],
 		               r['structure'],
 		               r['system'],
+		               r['printName'],
 		               r['age'],
 		               r['ageMin'],
 		               r['ageMax'],
 		               r['expressed'],
+		               r['hasImage'],
 		               userKey, userKey), None)
 
         else:
@@ -280,10 +284,12 @@ def process(mode):
 		     mgi_utils.prvalue(r['note']) + COLDL +
 		     mgi_utils.prvalue(r['structure']) + COLDL +
 		     mgi_utils.prvalue(r['system']) + COLDL +
+		     mgi_utils.prvalue(r['printName']) + COLDL +
 		     mgi_utils.prvalue(r['age']) + COLDL +
 		     mgi_utils.prvalue(r['ageMin']) + COLDL +
 		     mgi_utils.prvalue(r['ageMax']) + COLDL +
 		     mgi_utils.prvalue(r['expressed']) + COLDL +
+		     mgi_utils.prvalue(r['hasImage']) + COLDL +
 		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		     loaddate + COLDL + loaddate + LINEDL)
 
@@ -318,6 +324,8 @@ def process(mode):
 		         mgi_utils.prvalue(r['name']) + COLDL +
 		         mgi_utils.prvalue(r['alleleType']) + COLDL +
 		         mgi_utils.prvalue(r['note']) + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
