@@ -131,8 +131,8 @@ querySQL1 = '''
 	  and aa._Allele_key = a._Object_key
 	  and a._LogicalDB_key = 1
 	  and a._MGIType_key = 11
+	  and a.prefixPart = 'MGI:'
 	  and a.preferred = 1
-	  and a.private = 0
 	'''
 
 # select Cre alleles that have no genotype/structure information
