@@ -53,6 +53,9 @@
 #
 # Modification History:
 #
+# 04/18/2013	lec
+#	- TR11248/add 'age'
+#
 # 03/31/2011	lec
 #	- TR 10658/added primary key to ALL_Cre_Cache
 #
@@ -94,7 +97,13 @@ querySQL1 = '''
           nc.note,
           sn.structure,
           system = t2.term,
-          e.expressed
+	  s.printName,
+	  e.age,
+	  e.ageMin,
+	  e.ageMax,
+          e.expressed,
+	  e.hasImage,
+	  a.accID
 	into #toprocess1
         from 
           GXD_Expression e, 
@@ -105,7 +114,8 @@ querySQL1 = '''
           VOC_Term t2,
           MGI_Note n,
           MGI_NoteChunk nc,
-          ALL_Allele aa
+          ALL_Allele aa,
+	  ACC_Accession a
         where e._AssayType_key in (9,10,11)
           and e._GenoType_key = ag._GenoType_key
           and e._Marker_key = ag._Marker_key
@@ -118,20 +128,31 @@ querySQL1 = '''
           and ag._Allele_key = n._Object_key
           and n._Note_key = nc._Note_key
           and n._NoteType_key = 1034
+	  and aa._Allele_key = a._Object_key
+	  and a._LogicalDB_key = 1
+	  and a._MGIType_key = 11
+	  and a.prefixPart = 'MGI:'
+	  and a.preferred = 1
 	'''
 
 # select Cre alleles that have no genotype/structure information
 # status = approved, autoload ONLY
 
 querySQL2 = '''
-	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, alleleType = t1.term, nc.note
+	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
+		alleleType = t1.term, nc.note, a.accID
 	into #toprocess2
-	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc
+	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc, ACC_Accession a
 	where aa._Allele_Status_key in (847114, 3983021)
 	and aa._Allele_Type_key = t1._Term_key
 	and aa._Allele_key = n._Object_key
       	and n._NoteType_key = 1034
     	and n._Note_key = nc._Note_key
+	and aa._Allele_key = a._Object_key
+	and a._LogicalDB_key = 1
+	and a._MGIType_key = 11
+	and a.preferred = 1
+	and a.private = 0
 	and not exists (select 1 from #toprocess1 t where aa._Allele_key = t._Allele_key)
 	'''
 
@@ -142,8 +163,8 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s",%s,%s,%s,getdate(),getdate())'
-insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s",null,null,null,%s,%s,getdate(),getdate())'
+insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,getdate(),getdate())'
+insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,getdate(),getdate())'
 
 def showUsage():
 	'''
@@ -249,13 +270,19 @@ def process(mode):
 		               r['_Structure_key'],
 		               r['_System_key'],
 		               r['_Assay_key'],
+		               r['accID'],
 		               r['symbol'],
 		               r['name'],
 		               r['alleleType'],
 		               r['note'],
 		               r['structure'],
 		               r['system'],
+		               r['printName'],
+		               r['age'],
+		               r['ageMin'],
+		               r['ageMax'],
 		               r['expressed'],
+		               r['hasImage'],
 		               userKey, userKey), None)
 
         else:
@@ -265,13 +292,19 @@ def process(mode):
 		     mgi_utils.prvalue(r['_Structure_key']) + COLDL +
 		     mgi_utils.prvalue(r['_System_key']) + COLDL +
 		     mgi_utils.prvalue(r['_Assay_key']) + COLDL +
+		     mgi_utils.prvalue(r['accID']) + COLDL +
 		     mgi_utils.prvalue(r['symbol']) + COLDL +
 		     mgi_utils.prvalue(r['name']) + COLDL +
 		     mgi_utils.prvalue(r['alleleType']) + COLDL +
 		     mgi_utils.prvalue(r['note']) + COLDL +
 		     mgi_utils.prvalue(r['structure']) + COLDL +
 		     mgi_utils.prvalue(r['system']) + COLDL +
+		     mgi_utils.prvalue(r['printName']) + COLDL +
+		     mgi_utils.prvalue(r['age']) + COLDL +
+		     mgi_utils.prvalue(r['ageMin']) + COLDL +
+		     mgi_utils.prvalue(r['ageMax']) + COLDL +
 		     mgi_utils.prvalue(r['expressed']) + COLDL +
+		     mgi_utils.prvalue(r['hasImage']) + COLDL +
 		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		     loaddate + COLDL + loaddate + LINEDL)
 
@@ -290,6 +323,7 @@ def process(mode):
 	       db.sql(insertSQL2 % (str(nextMaxKey) ,
 				   r['_Allele_key'],
                                    r['_Allele_Type_key'],
+		                   r['accID'],
 		                   r['symbol'],
 		                   r['name'],
 		                   r['alleleType'],
@@ -302,10 +336,16 @@ def process(mode):
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue(r['accID']) + COLDL +
 		         mgi_utils.prvalue(r['symbol']) + COLDL +
 		         mgi_utils.prvalue(r['name']) + COLDL +
 		         mgi_utils.prvalue(r['alleleType']) + COLDL +
 		         mgi_utils.prvalue(r['note']) + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
