@@ -1,4 +1,4 @@
-#!/bin/csh -fx
+#!/bin/csh -f
 
 #
 # Wrapper script to create & load Allele Combination Notes into MGI_Note
