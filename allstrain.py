@@ -48,8 +48,20 @@ import sys
 import os
 import getopt
 import string
-import db
 import reportlib
+
+try:
+    if os.environ['DB_TYPE'] == 'postgres':
+        import pg_db
+        db = pg_db
+        db.setTrace()
+        db.setAutoTranslateBE()
+    else:
+        import db
+        db.set_sqlLogFunction(db.sqlLogAll)
+except:
+    import db
+    db.set_sqlLogFunction(db.sqlLogAll)
 
 CRT = reportlib.CRT
 SPACE = reportlib.SPACE
@@ -83,10 +95,12 @@ def selectData():
 	#		Other (see notes)
 	#
 
-	cmd = '''select a._Allele_key, symbol = substring(a.symbol,1,35),
-		sooKey = a._Strain_key, alleleStrain = substring(s1.strain,1,25), 
-		parentKey = cc._Strain_key, parentStrain = substring(s2.strain,1,25), 
-		parentCellLine = substring(cc.cellLine,1,25)
+	cmd = '''select a._Allele_key, substring(a.symbol,1,35) as symbol,
+		a._Strain_key as sooKey, 
+		substring(s1.strain,1,25) as alleleStrain, 
+		cc._Strain_key as parentKey, 
+		substring(s2.strain,1,25) as parentStrain,  
+		substring(cc.cellLine,1,25) as parentCellLine
 		into #toUpdate1
 		from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
 		PRB_Strain s1, PRB_Strain s2
@@ -106,12 +120,14 @@ def selectData():
 	# select mutant cell line strain != parent cell line strain
 	#
 
-	cmd = '''select symbol = substring(a.symbol,1,35),
-		mutantCellLineKey = c._CellLine_key,
-		mutantCellLine = substring(c.cellLine,1,25),
-		mutantKey = c._Strain_key, mutantStrain = substring(s1.strain,1,25), 
-		parentKey = cc._Strain_key, parentStrain = substring(s2.strain,1,25), 
-		parentCellLine = substring(cc.cellLine,1,25)
+	cmd = '''select substring(a.symbol,1,35) as symbol,
+		c._CellLine_key as mutantCellLineKey,
+		substring(c.cellLine,1,25) as mutantCellLine,
+		c._Strain_key as mutantKey, 
+		substring(s1.strain,1,25) as mutantStrain, 
+		cc._Strain_key as parentKey, 
+		substring(s2.strain,1,25) as parentStrain, 
+		substring(cc.cellLine,1,25) as parentCellLine
 		into #toUpdate2
 		from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
 		PRB_Strain s1, PRB_Strain s2
@@ -243,11 +259,12 @@ def doDelete():
 	#
 
 
-	deleteSQL = '''delete ALL_CellLine 
-		from ALL_CellLine a
-		where a.cellLine = "Not Specified"
-		and a.isMutant = 1
-		and not exists (select 1 from ALL_Allele_CellLine c where a._CellLine_key = c._MutantCellLine_key)
+	deleteSQL = '''delete 
+		from ALL_CellLine
+		where cellLine = \'Not Specified\'
+		and isMutant = 1
+		and not exists (select 1 from ALL_Allele_CellLine c 
+			where ALL_CellLine._CellLine_key = c._MutantCellLine_key)
 		'''
 
 	db.sql(deleteSQL, None)
@@ -286,7 +303,6 @@ if server is None or \
 
 db.set_sqlLogin(user, password, server, database)
 db.useOneConnection(1)
-db.set_sqlLogFunction(db.sqlLogAll)
 
 # select all alleles...
 selectData()
@@ -300,5 +316,6 @@ doUpdate()
 # remove defunct 'not specified' mutant cell lines
 doDelete()
 
+db.commit()
 db.useOneConnection(0)
 

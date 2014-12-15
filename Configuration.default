@@ -13,6 +13,23 @@ endif
 
 source ${MGICONFIG}/master.config.csh
 
+setenv DB_TYPE sybase
+
+if ( ${DB_TYPE} == 'postgres' ) then
+
+setenv SCHEMADIR ${PG_MGD_DBSCHEMADIR}
+setenv BCP_CMD "${PG_DBUTILS}/bin/bcpin.csh ${PG_DBSERVER} ${PG_DBNAME}"
+setenv PG_DB_SCHEMA mgd
+setenv PYTHON_CMD "-S${PG_DBSERVER} -D${PG_DBNAME} -U${PG_DBUSER} -P${PG_1LINE_PASSFILE}"
+
+else
+
+setenv SCHEMADIR ${MGD_DBSCHEMADIR}
+setenv BCP_CMD "${MGI_DBUTILS}/bin/bcpin.csh ${MGD_DBSERVER} ${MGD_DBNAME}"
+setenv PYTHON_CMD "-S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE}"
+
+endif
+
 # directory
 setenv ALLCACHEDIR		${DATALOADSOUTPUT}/mgi/allcacheload
 
@@ -25,11 +42,14 @@ setenv ALLCACHEBCPDIR		${ALLCACHEDIR}/output
 # log directory
 setenv ALLCACHELOGDIR		${ALLCACHEDIR}/logs
 
+# report output directory
+setenv QCOUTPUTDIR              ${QCREPORTDIR}/output
+
 # noteload configuration values
 setenv NOTEMODE 		load
 setenv NOTEOBJECTTYPE       	Genotype
 
-setenv COLDELIM         "&#&"
+setenv COLDELIM         "|"
 setenv LINEDELIM        "\n"
 setenv CREATEDBY        1000
 

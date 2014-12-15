@@ -22,11 +22,23 @@
 
 import sys
 import os
-import db
 import mgi_utils
 
-COLDL = os.environ['COLDELIM']
-LINEDL = '\n'
+try:
+    if os.environ['DB_TYPE'] == 'postgres':
+        import pg_db
+        db = pg_db
+        db.setTrace()
+        db.setAutoTranslateBE()
+    else:
+        import db
+	db.set_sqlLogFunction(db.sqlLogAll)
+except:
+    import db
+    db.set_sqlLogFunction(db.sqlLogAll)
+
+COLDL = "|"
+LINEDL = "\n"
 loaddate = mgi_utils.date("%m/%d/%Y")
 
 #
@@ -61,9 +73,9 @@ def priority1():
 
         print 'processing priority 1...%s' % mgi_utils.date()
 
-	cmd = 'select distinct a._Allele_key, label = a.symbol ' + \
-		'from ALL_Allele a ' + \
-		'where a.isWildType = 0 '
+	cmd = '''select distinct a._Allele_key, a.symbol as label 
+		 from ALL_Allele a where a.isWildType = 0 
+	      '''
 
 	if alleleKey is not None:
 		cmd = cmd + 'and a._Allele_key = %s\n' % alleleKey
@@ -76,9 +88,9 @@ def priority2():
 
         print 'processing priority 2...%s' % mgi_utils.date()
 
-	cmd = 'select distinct a._Allele_key, label = a.name ' + \
-		'from ALL_Allele a ' + \
-		'where a.isWildType = 0 '
+	cmd = '''select distinct a._Allele_key, a.name as label 
+		 from ALL_Allele a where a.isWildType = 0 
+	      '''
 
 	if alleleKey is not None:
 		cmd = cmd + 'and a._Allele_key = %s\n' % alleleKey
@@ -91,10 +103,11 @@ def priority3():
 
         print 'processing priority 3...%s' % mgi_utils.date()
 
-	cmd = 'select distinct _Allele_key = s._Object_key, label = s.synonym ' + \
-		'from MGI_SynonymType st, MGI_Synonym s ' + \
-		'where st._MGIType_key = 11 ' + \
-		'and st._SynonymType_key = s._SynonymType_key '
+	cmd = '''select distinct s._Object_key as _Allele_key, s.synonym as label
+		from MGI_SynonymType st, MGI_Synonym s 
+		where st._MGIType_key = 11 
+		and st._SynonymType_key = s._SynonymType_key 
+		'''
 
 	if alleleKey is not None:
 		cmd = cmd + 'and s._Object_key = %s\n' % alleleKey
@@ -122,5 +135,6 @@ priority3()
 
 print '%s' % mgi_utils.date()
 outBCP.close()
+db.commit()
 db.useOneConnection(0)
 

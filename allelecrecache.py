@@ -70,13 +70,27 @@ import sys
 import os
 import getopt
 import string
-import db
 import loadlib
 import reportlib
 import mgi_utils
 
-COLDL = '&#&'
-LINEDL = '\n'
+try:
+    if os.environ['DB_TYPE'] == 'postgres':
+        import pg_db
+        db = pg_db
+        db.setTrace()
+        db.setAutoTranslateBE()
+    else:
+        import db
+	db.set_sqlLogFunction(db.sqlLogAll)
+except:
+    import db
+    db.set_sqlLogFunction(db.sqlLogAll)
+
+COLDL = "|"
+LINEDL = "\n"
+
+#COLDL = '&#&'
 
 userKey = 0
 loaddate = loadlib.loaddate
@@ -93,10 +107,10 @@ querySQL1 = '''
           e._Assay_key,
           aa.symbol,
           aa.name,
-	  alleleType = t1.term,
+	  t1.term as alleleType,
           nc.note,
           sn.structure,
-          system = t2.term,
+          t2.term as system,
 	  s.printName,
 	  e.age,
 	  e.ageMin,
@@ -140,7 +154,7 @@ querySQL1 = '''
 
 querySQL2 = '''
 	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
-		alleleType = t1.term, nc.note, a.accID
+		t1.term as alleleType, nc.note, a.accID
 	into #toprocess2
 	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc, ACC_Accession a
 	where aa._Allele_Status_key in (847114, 3983021)
@@ -163,8 +177,12 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,getdate(),getdate())'
-insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,getdate(),getdate())'
+if os.environ['DB_TYPE'] == 'postgres':
+	insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,current_date,current_date)'
+	insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,current_date,current_date)'
+else:
+	insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,getdate(),getdate())'
+	insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,getdate(),getdate())'
 
 def showUsage():
 	'''
@@ -237,19 +255,20 @@ def process(mode):
     # Throws:
 
     db.sql('create index idx1 on #toprocess1(_Allele_key)', None)
-    db.sql('create index idx1 on #toprocess2(_Allele_key)', None)
+    db.sql('create index idx2 on #toprocess2(_Allele_key)', None)
 
     if mode == 'bcp':
        outBCP = open(os.environ['ALLCACHEBCPDIR'] + '/ALL_Cre_Cache.bcp', 'w')
     else:
 	db.sql(deleteSQL, None)
+	db.commit()
 
     #
     # next available primary key
     #
     
     if mode == 'sql':
-        results = db.sql('select cacheKey = max(_Cache_key) from ALL_Cre_Cache', 'auto')
+        results = db.sql('select max(_Cache_key) as cacheKey from ALL_Cre_Cache', 'auto')
         for r in results:
 	    nextMaxKey = r['cacheKey']
 
@@ -396,7 +415,6 @@ def main():
 
     db.set_sqlLogin(user, password, server, database)
     db.useOneConnection(1)
-    db.set_sqlLogFunction(db.sqlLogAll)
 
     userKey = loadlib.verifyUser(user, 0, None)
 
@@ -419,6 +437,7 @@ def main():
     except:
 	bailOut('problem finding/running an invocation')
 
+    db.commit()
     db.useOneConnection(0)
 
     return

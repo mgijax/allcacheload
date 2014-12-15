@@ -14,7 +14,11 @@ setenv LOG	${ALLCACHELOGDIR}/`basename $0`.log
 rm -rf $LOG
 touch $LOG
 
+setenv TABLE ALL_Label
+
 date | tee -a ${LOG}
+
+echo 'running...' ${DB_TYPE}
 
 # Create the bcp file
 
@@ -29,15 +33,16 @@ endif
 
 # Allow bcp into database and truncate tables
 
-${MGD_DBSCHEMADIR}/table/ALL_Label_truncate.object | tee -a ${LOG}
+# truncate table
+${SCHEMADIR}/table/${TABLE}_truncate.object | tee -a ${LOG}
 
 # Drop indexes
-${MGD_DBSCHEMADIR}/index/ALL_Label_drop.object | tee -a ${LOG}
+${SCHEMADIR}/index/${TABLE}_drop.object | tee -a ${LOG}
 
 # BCP new data into tables
-${MGI_DBUTILS}/bin/bcpin.csh ${MGD_DBSERVER} ${MGD_DBNAME} ALL_Label ${ALLCACHEBCPDIR} ALL_Label.bcp ${COLDELIM} ${LINEDELIM} | tee -a ${LOG}
+${BCP_CMD} ${TABLE} ${ALLCACHEBCPDIR} ${TABLE}.bcp ${COLDELIM} ${LINEDELIM} ${PG_DB_SCHEMA} | tee -a ${LOG}
 
 # Create indexes
-${MGD_DBSCHEMADIR}/index/ALL_Label_create.object | tee -a ${LOG}
+${SCHEMADIR}/index/${TABLE}_create.object | tee -a ${LOG}
 
 date | tee -a ${LOG}
