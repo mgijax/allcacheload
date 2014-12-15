@@ -54,6 +54,9 @@ and g._Marker_key = 24690
 and g._Genotype_key = n._Object_key
 go
 
+delete from MGI_Note where MGI_Note._NoteType_key in (1016,1017,1018) and _Object_key = 58379
+go
+
 checkpoint
 go
 end
@@ -79,12 +82,16 @@ and g._Marker_key = 24690
 and g._Genotype_key = n._Object_key
 ;
 
+delete from MGI_Note where MGI_Note._NoteType_key in (1016,1017,1018) and _Object_key = 58379
+;
+
 EOSQL
 
 # run test for sybase
 
 sed '/setenv DB_TYPE postgres/s//setenv DB_TYPE sybase/g' < Configuration > Configuration.new
 mv Configuration.new Configuration
+source ./Configuration
 
 #alllabel.csh | tee -a $LOG
 #cp ${DATALOADSOUTPUT}/mgi/allcacheload/output/ALL_Label.bcp ${DATALOADSOUTPUT}/mgi/allcacheload/output/ALL_Label.bcp.sybase
@@ -107,6 +114,7 @@ allelecombinationByMarker.py ${PYTHON_CMD} -K24690
 
 sed '/setenv DB_TYPE sybase/s//setenv DB_TYPE postgres/g' < Configuration > Configuration.new
 mv Configuration.new Configuration
+source ./Configuration
 
 #alllabel.csh | tee -a $LOG
 #cp ${DATALOADSOUTPUT}/mgi/allcacheload/output/ALL_Label.bcp ${DATALOADSOUTPUT}/mgi/allcacheload/output/ALL_Label.bcp.postgres
