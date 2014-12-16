@@ -224,13 +224,21 @@ def doUpdate():
 
 	db.sql('create index idx_allele on #toUpdate1(_Allele_key)', None)
 
-	updateSQL = '''update ALL_Allele
-			set _Strain_key = t.parentKey
-			from #toUpdate1 t, ALL_Allele a
-			where t._Allele_key = a._Allele_key
-			'''
+        if os.environ['DB_TYPE'] == 'postgres':
+		updateSQL = '''update ALL_Allele a
+				set _Strain_key = t.parentKey
+				from #toUpdate1 t
+				where t._Allele_key = a._Allele_key
+				'''
+	else:
+		updateSQL = '''update ALL_Allele
+				set _Strain_key = t.parentKey
+				from #toUpdate1 t, ALL_Allele a
+				where t._Allele_key = a._Allele_key
+				'''
 
 	db.sql(updateSQL, None)
+	db.commit()
 
 	#
 	# mutant cell line strain = parent cell line strain
@@ -268,6 +276,7 @@ def doDelete():
 		'''
 
 	db.sql(deleteSQL, None)
+	db.commit()
 
 #
 # Main Routine

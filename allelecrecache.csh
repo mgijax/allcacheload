@@ -43,7 +43,7 @@ date | tee -a ${LOG}
 #
 
 # temporary turn off for testing
-#${ADSYSTEMLOAD}/adsystemload.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
+${ADSYSTEMLOAD}/adsystemload.py ${PYTHON_CMD} | tee -a ${LOG}
 
 # Create the bcp file
 
