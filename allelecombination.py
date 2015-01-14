@@ -66,15 +66,17 @@ try:
         db = pg_db
         db.setTrace()
         db.setAutoTranslateBE()
+	notenewline = '\\n'
     else:
         import db
         db.set_sqlLogFunction(db.sqlLogAll)
+	notenewline = '\n'
 
 except:
     import db
     db.set_sqlLogFunction(db.sqlLogAll)
+    notenewline = '\n'
 
-notenewline = '\\n'
 bcpnewline = '\n'
 sqlnewline = '\n'
 mgiTypeKey = 12
@@ -649,6 +651,9 @@ def process(mode):
 	    cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
 	    cmd = cmd + processNote(g, displayNotes2, combNoteType2)
 	    cmd = cmd + processNote(g, displayNotes2, combNoteType3)
+	    print processNote(g, displayNotes1, combNoteType1)
+	    print processNote(g, displayNotes1, combNoteType2)
+	    print processNote(g, displayNotes1, combNoteType3)
 
     	    if os.environ['DB_TYPE'] == 'postgres':
 		cmd = cmd + "commit transaction;\n"
