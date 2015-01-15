@@ -43,7 +43,7 @@ date | tee -a ${LOG}
 #
 
 # temporary turn off for testing
-#${ADSYSTEMLOAD}/adsystemload.py ${PYTHON_CMD} | tee -a ${LOG}
+${ADSYSTEMLOAD}/adsystemload.py ${PYTHON_CMD} | tee -a ${LOG}
 
 # Create the bcp file
 
