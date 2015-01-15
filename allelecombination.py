@@ -66,19 +66,15 @@ try:
         db = pg_db
         db.setTrace()
         db.setAutoTranslateBE()
-	notenewline = '\\n'
     else:
         import db
         db.set_sqlLogFunction(db.sqlLogAll)
-	notenewline = '\n'
 
 except:
     import db
     db.set_sqlLogFunction(db.sqlLogAll)
-    notenewline = '\n'
 
-bcpnewline = '\n'
-sqlnewline = '\n'
+notenewline = '\\n'
 mgiTypeKey = 12
 userKey = 0
 combNoteType1 = 1016
@@ -239,13 +235,14 @@ def process(mode):
     # Effects:
     # Throws:
 
+    global notenewline
+
     if mode == 'bcp':
 	fp1 = reportlib.init('allelecombnotetype1', printHeading = None)
 	fp2 = reportlib.init('allelecombnotetype2', printHeading = None)
 	fp3 = reportlib.init('allelecombnotetype3', printHeading = None)
-	newline = bcpnewline
     else:
-	newline = sqlnewline
+	notenewline = '\n'
 
     # delete existiing Allele Combination notes for Genotypes we're processing
 
@@ -741,7 +738,7 @@ try:
 
 except:
 
-    print 'finished deleting existing allele combination\n'
+    print 'exeception during generation of allele-combination report\n'
     sys.stdout.flush()
     
 db.commit()
