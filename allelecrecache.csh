@@ -43,7 +43,7 @@ date | tee -a ${LOG}
 #
 
 # temporary turn off for testing
-${ADSYSTEMLOAD}/adsystemload.py ${PYTHON_CMD} | tee -a ${LOG}
+#${ADSYSTEMLOAD}/adsystemload.py ${PYTHON_CMD} | tee -a ${LOG}
 
 # Create the bcp file
 
@@ -61,7 +61,7 @@ ${SCHEMADIR}/table/${TABLE}_truncate.object | tee -a ${LOG}
 ${SCHEMADIR}/index/${TABLE}_drop.object | tee -a ${LOG}
 
 # BCP new data into tables
-${BCP_CMD} ${TABLE} ${ALLCACHEBCPDIR} ${TABLE}.bcp ${COLDELIM} ${LINEDELIM} ${PG_DB_SCHEMA} | tee -a ${LOG}
+${BCP_CMD} ${TABLE} ${ALLCACHEBCPDIR} ${TABLE}.bcp ${COLDELIM} ${LINEDELIM} ${SCHEMADIR} | tee -a ${LOG}
 
 # Create indexes
 ${SCHEMADIR}/index/${TABLE}_create.object | tee -a ${LOG}
