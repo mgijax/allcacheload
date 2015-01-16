@@ -1,3 +1,9 @@
+TAG: allcacheload-5-2-1-7
+DATE: 1/16/2015
+STAFF: dbm
+CHANGES:
+1) allelecrecache.csh: send output from adsystemload.py call to log file ONLY
+
 TAG: allcacheload-5-2-1-6
 TAG: allcacheload-5-2-1-5
 TAG: allcacheload-5-2-1-4
