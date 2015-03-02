@@ -13,8 +13,6 @@ endif
 
 source ${MGICONFIG}/master.config.csh
 
-setenv DB_TYPE sybase
-
 if ( ${DB_TYPE} == 'postgres' ) then
 
 setenv SCHEMADIR ${PG_MGD_DBSCHEMADIR}
