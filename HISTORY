@@ -1,3 +1,9 @@
+TAG: allcacheload-5-2-1-8
+DATE: 3/2/2015
+STAFF: dbm
+CHANGES:
+1) Configuration.default: Don't set DB_TYPE -- done in mgiconfig
+
 TAG: allcacheload-5-2-1-7
 DATE: 1/16/2015
 STAFF: dbm
