@@ -1,3 +1,8 @@
+TAG: allcacheload-5-2-1-9
+DATE: 04/10/2015
+STAFF: kstone
+1) Fixed bug in bcp call for alllabel and allelecre
+
 TAG: allcacheload-5-2-1-8
 DATE: 3/2/2015
 STAFF: dbm
