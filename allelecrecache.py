@@ -305,6 +305,8 @@ def process(mode):
 		               userKey, userKey), None)
 
         else:
+	    if os.environ['DB_TYPE'] == 'postgres':
+                    r['note'] = r['note'].replace('\n','\\n')
             outBCP.write(str(nextMaxKey) + COLDL +
 		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
@@ -349,6 +351,8 @@ def process(mode):
 		                   r['note'],
 		                   userKey, userKey), None)
             else:
+		if os.environ['DB_TYPE'] == 'postgres':
+                    r['note'] = r['note'].replace('\n','\\n')
                 outBCP.write(str(nextMaxKey) + COLDL +
 			 mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
