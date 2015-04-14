@@ -13,11 +13,11 @@ endif
 
 source ${MGICONFIG}/master.config.csh
 
+setenv PG_DB_SCHEMA mgd
 if ( ${DB_TYPE} == 'postgres' ) then
 
 setenv SCHEMADIR ${PG_MGD_DBSCHEMADIR}
 setenv BCP_CMD "${PG_DBUTILS}/bin/bcpin.csh ${PG_DBSERVER} ${PG_DBNAME}"
-setenv PG_DB_SCHEMA mgd
 setenv PYTHON_CMD "-S${PG_DBSERVER} -D${PG_DBNAME} -U${PG_DBUSER} -P${PG_1LINE_PASSFILE}"
 
 else
