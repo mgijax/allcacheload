@@ -16,17 +16,16 @@ source ${MGICONFIG}/master.config.csh
 setenv PG_DB_SCHEMA mgd
 if ( ${DB_TYPE} == 'postgres' ) then
 
-setenv SCHEMADIR ${MGD_DBSCHEMADIR}
 setenv BCP_CMD "${PG_DBUTILS}/bin/bcpin.csh ${MGD_DBSERVER} ${MGD_DBNAME}"
-setenv PYTHON_CMD "-S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE}"
 
 else
 
-setenv SCHEMADIR ${MGD_DBSCHEMADIR}
 setenv BCP_CMD "${MGI_DBUTILS}/bin/bcpin.csh ${MGD_DBSERVER} ${MGD_DBNAME}"
-setenv PYTHON_CMD "-S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE}"
 
 endif
+
+setenv SCHEMADIR ${MGD_DBSCHEMADIR}
+setenv PYTHON_CMD "-S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE}"
 
 # directory
 setenv ALLCACHEDIR		${DATALOADSOUTPUT}/mgi/allcacheload
