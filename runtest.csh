@@ -81,7 +81,7 @@ go
 end
 EOSQL
 
-psql -h ${PG_DBSERVER} -U ${PG_DBUSER} -d ${PG_DBNAME} <<EOSQL | tee -a $TESTLOG
+psql -h ${MGD_DBSERVER} -U ${MGD_DBUSER} -d ${MGD_DBNAME} <<EOSQL | tee -a $TESTLOG
 
 -- allelecombinationByGenotype.py ${PYTHON_CMD} -K58379 : 3 rows
 select * from MGI_Note where MGI_Note._NoteType_key in (1016,1017,1018) and _Object_key = 58379
@@ -243,7 +243,7 @@ go
 end
 EOSQL
 
-psql -h ${PG_DBSERVER} -U ${PG_DBUSER} -d ${PG_DBNAME} <<EOSQL | tee -a $TESTLOG
+psql -h ${MGD_DBSERVER} -U ${MGD_DBUSER} -d ${MGD_DBNAME} <<EOSQL | tee -a $TESTLOG
 select count(*) from ALL_Label;
 --select distinct _Strain_key from ALL_Allele;
 select count(*) from ALL_CellLine;
