@@ -59,20 +59,11 @@ import getopt
 import string
 import loadlib
 import reportlib
+import db
 
-try:
-    if os.environ['DB_TYPE'] == 'postgres':
-        import pg_db
-        db = pg_db
-        db.setTrace()
-        db.setAutoTranslateBE()
-    else:
-        import db
-        db.set_sqlLogFunction(db.sqlLogAll)
-
-except:
-    import db
-    db.set_sqlLogFunction(db.sqlLogAll)
+db.setTrace()
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
 
 notenewline = '\\n'
 mgiTypeKey = 12
@@ -109,7 +100,7 @@ def processAll():
 
     # select all Genotypes
 
-    db.sql('''select a._Object_key as _Genotype_key, a.accID as genotypeID into #toprocess 
+    db.sql('''select a._Object_key as _Genotype_key, a.accID as genotypeID INTO TEMPORARY TABLE toprocess 
 	from ACC_Accession a 
 	where a._MGIType_key = 12 
 	and a._LogicalDB_key = 1 
@@ -117,7 +108,7 @@ def processAll():
 	and a.preferred = 1
 	''', None)
 
-    db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
+    db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
     process('bcp')
 
@@ -135,11 +126,11 @@ def processByAllele(objectKey):
     # select all Genotypes of a specified Allele
 
     db.sql('''
-	select distinct _Genotype_key, null as genotypeID into #toprocess from GXD_AlleleGenotype 
+	select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_AlleleGenotype 
 	where _Allele_key = %s
 	''' % (objectKey), None)
 
-    db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
+    db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
     process('sql')
 
@@ -152,11 +143,11 @@ def processByMarker(objectKey):
 
     # select all Genotypes of a specified Marker
 
-    db.sql('''select distinct _Genotype_key, null as genotypeID into #toprocess from GXD_AlleleGenotype
+    db.sql('''select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_AlleleGenotype
 	where _Marker_key = %s
 	''' % (objectKey), None)
 
-    db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
+    db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
     process('sql')
 
@@ -170,11 +161,11 @@ def processByGenotype(objectKey):
     # select all Genotypes of a specified Genotype
 
     db.sql('''
-	select distinct _Genotype_key, null as genotypeID into #toprocess from GXD_Genotype
+	select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_Genotype
 	where _Genotype_key = %s
 	''' % (objectKey), None)
 
-    db.sql('create index idx1 on #toprocess(_Genotype_key)', None)
+    db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
     process('sql')
 
@@ -185,46 +176,27 @@ def processNote(objectKey, notes, noteTypeKey):
     # Effects:
     # Throws:
 
-    # kludge to fix issue where an escacped character appears at the exact split of note chunk (254/255).  
-    # once we convert to non-note chunking, this kludge can be removed
-    # add a space to move the escaped character into the next note-chunk
-    if os.environ['DB_TYPE'] == 'postgres':
-	if len(notes) > 255:
-		notes = notes.replace('\\', ' \\')
+    if len(notes) > 255:
+	notes = notes.replace('\\', ' \\')
 
-    if os.environ['DB_TYPE'] == 'postgres':
-    	noteCmd = 'insert into MGI_Note' + \
-              	' values ((select * from noteKeyMax), %s, %s, %s, %s, %s, current_date, current_date);\n' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
-    else:
-    	noteCmd = 'insert into MGI_Note' + \
-              	' values (@noteKey, %s, %s, %s, %s, %s, getdate(), getdate())\n' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
+    noteCmd = 'insert into MGI_Note' + \
+              ' values ((select * from noteKeyMax), %s, %s, %s, %s, %s, current_date, current_date);\n' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
 
     seqNum = 1
 
     while len(notes) > 255:
-    	if os.environ['DB_TYPE'] == 'postgres':
-		noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
-			' values ((select * from noteKeyMax), %d, E"%s", %s, %s, current_date, current_date);\n' % (seqNum, notes[:255], userKey, userKey)
-	else:
-		noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
-			' values (@noteKey, %d, "%s", %s, %s, getdate(), getdate())\n' % (seqNum, notes[:255], userKey, userKey)
+	noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
+		' values ((select * from noteKeyMax), %d, E"%s", %s, %s, current_date, current_date);\n' % (seqNum, notes[:255], userKey, userKey)
 	notes = notes[255:]
 	seqNum = seqNum + 1
 
     if len(notes) > 0:
-    	if os.environ['DB_TYPE'] == 'postgres':
-		noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
-			' values ((select * from noteKeyMax), %d, E"%s", %s, %s, current_date, current_date);\n' % (seqNum, notes, userKey, userKey)
-	else:
-		noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
-			' values (@noteKey, %d, "%s", %s, %s, getdate(), getdate())\n' % (seqNum, notes, userKey, userKey)
+	noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
+		' values ((select * from noteKeyMax), %d, E"%s", %s, %s, current_date, current_date);\n' % (seqNum, notes, userKey, userKey)
 
     # increment the MGI_Note._Note_key
 
-    if os.environ['DB_TYPE'] == 'postgres':
-	noteCmd = noteCmd + 'update noteKeyMax set noteKey = noteKey + 1;\n'
-    else:
-    	noteCmd = noteCmd + 'select @noteKey = @noteKey + 1\n'
+    noteCmd = noteCmd + 'update noteKeyMax set noteKey = noteKey + 1;\n'
 
     return noteCmd
 
@@ -250,20 +222,12 @@ def process(mode):
         print '\ndeleting existing allele combination\n'
 	sys.stdout.flush()
 
-    if os.environ['DB_TYPE'] == 'postgres':
-    	db.sql('''delete from MGI_Note 
-		using #toprocess p 
-		where p._Genotype_key = MGI_Note._Object_key 
-		and MGI_Note._MGIType_key = %s 
-		and MGI_Note._NoteType_key in (%s,%s,%s)
-		''' % (mgiTypeKey, combNoteType1, combNoteType2, combNoteType3), None)
-    else:
-    	db.sql('''delete from MGI_Note 
-		from #toprocess p 
-		where p._Genotype_key = MGI_Note._Object_key 
-		and MGI_Note._MGIType_key = %s 
-		and MGI_Note._NoteType_key in (%s,%s,%s)
-		''' % (mgiTypeKey, combNoteType1, combNoteType2, combNoteType3), None)
+    db.sql('''delete from MGI_Note 
+	using toprocess p 
+	where p._Genotype_key = MGI_Note._Object_key 
+	and MGI_Note._MGIType_key = %s 
+	and MGI_Note._NoteType_key in (%s,%s,%s)
+	''' % (mgiTypeKey, combNoteType1, combNoteType2, combNoteType3), None)
 
     if DEBUG:
         print 'finished deleting existing allele combination\n'
@@ -332,10 +296,7 @@ def process(mode):
 	    and c1.prefixPart = "MGI:" 
 	    and c1.preferred = 1 
 	    )
-	    order by _Genotype_key, sequenceNum'''
-
-    if os.environ['DB_TYPE'] == 'postgres':
-	cmd = cmd + ";\n"
+	    order by _Genotype_key, sequenceNum;\n'''
 
     results = db.sql(cmd, 'auto')
 
@@ -638,22 +599,17 @@ def process(mode):
 	    # initialize the MGI_Note._Note_key primary key
 	    #
 
-    	    if os.environ['DB_TYPE'] == 'postgres':
-	    	cmd = 'begin transaction;\n'
-		cmd = cmd + 'create temp table noteKeyMax on commit drop as select max(_Note_key) + 1 as noteKey from MGI_Note;\n'
-	    else:
-            	cmd = 'declare @noteKey integer\n'
-            	cmd = cmd + 'select @noteKey = max(_Note_key + 1) from MGI_Note\n'
-
+	    cmd = 'begin transaction;\n'
+	    cmd = cmd + 'create temp table noteKeyMax on commit drop as select max(_Note_key) + 1 as noteKey from MGI_Note;\n'
 	    cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
 	    cmd = cmd + processNote(g, displayNotes2, combNoteType2)
 	    cmd = cmd + processNote(g, displayNotes2, combNoteType3)
+
 	    print processNote(g, displayNotes1, combNoteType1)
 	    print processNote(g, displayNotes1, combNoteType2)
 	    print processNote(g, displayNotes1, combNoteType3)
 
-    	    if os.environ['DB_TYPE'] == 'postgres':
-		cmd = cmd + "commit transaction;\n"
+	    cmd = cmd + "commit transaction;\n"
 
 	    db.sql(cmd, None)
         else:

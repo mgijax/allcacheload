@@ -173,9 +173,9 @@ def parseKOlines():
 
     knockoutKey = 1
 
-    result = db.sql('select max(_Knockout_key) + 1 from ALL_Knockout_Cache', 'auto')
-    if result[0][''] != None:
-	knockoutKey = result[0]['']
+    result = db.sql('select max(_Knockout_key) + 1 as maxKey from ALL_Knockout_Cache', 'auto')
+    if result[0]['maxKey'] != None:
+	knockoutKey = result[0]['maxKey']
 
     # For each line in the input file
 

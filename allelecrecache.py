@@ -73,19 +73,10 @@ import string
 import loadlib
 import reportlib
 import mgi_utils
+import db
 
-try:
-    if os.environ['DB_TYPE'] == 'postgres':
-        import pg_db
-        db = pg_db
-        db.setTrace()
-        db.setAutoTranslateBE()
-    else:
-        import db
-	db.set_sqlLogFunction(db.sqlLogAll)
-except:
-    import db
-    db.set_sqlLogFunction(db.sqlLogAll)
+db.setTrace()
+db.setAutoTranslateBE(False)
 
 COLDL = "|"
 LINEDL = "\n"
@@ -118,7 +109,7 @@ querySQL1 = '''
           e.expressed,
 	  e.hasImage,
 	  a.accID
-	into #toprocess1
+	INTO TEMPORARY TABLE toprocess1
         from 
           GXD_Expression e, 
           GXD_AlleleGenotype ag, 
@@ -155,7 +146,7 @@ querySQL1 = '''
 querySQL2 = '''
 	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
 		t1.term as alleleType, nc.note, a.accID
-	into #toprocess2
+	INTO TEMPORARY TABLE toprocess2
 	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc, ACC_Accession a
 	where aa._Allele_Status_key in (847114, 3983021)
 	and aa._Allele_Type_key = t1._Term_key
@@ -167,7 +158,7 @@ querySQL2 = '''
 	and a._MGIType_key = 11
 	and a.preferred = 1
 	and a.private = 0
-	and not exists (select 1 from #toprocess1 t where aa._Allele_key = t._Allele_key)
+	and not exists (select 1 from toprocess1 t where aa._Allele_key = t._Allele_key)
 	'''
 
 #is there a query 2?  default = true (1)
@@ -177,12 +168,8 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-if os.environ['DB_TYPE'] == 'postgres':
-	insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,current_date,current_date)'
-	insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,current_date,current_date)'
-else:
-	insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,getdate(),getdate())'
-	insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,getdate(),getdate())'
+insertSQL1 = 'insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s","%s","%s","%s","%s","%s",%s,%s,%s,%s,%s,%s,current_date,current_date)'
+insertSQL2 = 'insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,"%s","%s","%s","%s","%s",null,null,null,null,null,null,null,null,%s,%s,current_date,current_date)'
 
 def showUsage():
 	'''
@@ -254,8 +241,8 @@ def process(mode):
     # Effects:
     # Throws:
 
-    db.sql('create index idx1 on #toprocess1(_Allele_key)', None)
-    db.sql('create index idx2 on #toprocess2(_Allele_key)', None)
+    db.sql('create index idx1 on toprocess1(_Allele_key)', None)
+    db.sql('create index idx2 on toprocess2(_Allele_key)', None)
 
     if mode == 'bcp':
        outBCP = open(os.environ['ALLCACHEBCPDIR'] + '/ALL_Cre_Cache.bcp', 'w')
@@ -277,7 +264,7 @@ def process(mode):
     else:
 	nextMaxKey = 0
 
-    results = db.sql('select * from #toprocess1', 'auto')
+    results = db.sql('select * from toprocess1', 'auto')
     for r in results:
 
         nextMaxKey = nextMaxKey + 1
@@ -305,8 +292,7 @@ def process(mode):
 		               userKey, userKey), None)
 
         else:
-	    if os.environ['DB_TYPE'] == 'postgres':
-                    r['note'] = r['note'].replace('\n','\\n')
+            r['note'] = r['note'].replace('\n','\\n')
             outBCP.write(str(nextMaxKey) + COLDL +
 		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
@@ -335,7 +321,7 @@ def process(mode):
 
     if isQuerySQL2 == 1:
 
-        results = db.sql('select * from #toprocess2', 'auto')
+        results = db.sql('select * from toprocess2', 'auto')
         for r in results:
 
             nextMaxKey = nextMaxKey + 1
@@ -351,8 +337,7 @@ def process(mode):
 		                   r['note'],
 		                   userKey, userKey), None)
             else:
-		if os.environ['DB_TYPE'] == 'postgres':
-                    r['note'] = r['note'].replace('\n','\\n')
+                r['note'] = r['note'].replace('\n','\\n')
                 outBCP.write(str(nextMaxKey) + COLDL +
 			 mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +

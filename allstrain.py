@@ -49,19 +49,10 @@ import os
 import getopt
 import string
 import reportlib
+import db
 
-try:
-    if os.environ['DB_TYPE'] == 'postgres':
-        import pg_db
-        db = pg_db
-        db.setTrace()
-        db.setAutoTranslateBE()
-    else:
-        import db
-        db.set_sqlLogFunction(db.sqlLogAll)
-except:
-    import db
-    db.set_sqlLogFunction(db.sqlLogAll)
+db.setTrace()
+db.setAutoTranslateBE(False)
 
 CRT = reportlib.CRT
 SPACE = reportlib.SPACE
@@ -101,7 +92,7 @@ def selectData():
 		cc._Strain_key as parentKey, 
 		substring(s2.strain,1,25) as parentStrain,  
 		substring(cc.cellLine,1,25) as parentCellLine
-		into #toUpdate1
+		INTO TEMPORARY TABLE toUpdate1
 		from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
 		PRB_Strain s1, PRB_Strain s2
 		where a._Allele_key = mc._Allele_key
@@ -111,7 +102,7 @@ def selectData():
 		and a._Strain_key != cc._Strain_key
 		and a._Strain_key = s1._Strain_key
 		and cc._Strain_key = s2._Strain_key
-		and cc.cellLine not in ("Not Specified", "Other (see notes)")
+		and cc.cellLine not in (\'Not Specified\', \'Other (see notes)\')
 		'''
 
 	db.sql(cmd, None)
@@ -128,7 +119,7 @@ def selectData():
 		cc._Strain_key as parentKey, 
 		substring(s2.strain,1,25) as parentStrain, 
 		substring(cc.cellLine,1,25) as parentCellLine
-		into #toUpdate2
+		INTO TEMPORARY TABLE toUpdate2
 		from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
 		PRB_Strain s1, PRB_Strain s2
 		where a._Allele_key = mc._Allele_key
@@ -138,7 +129,7 @@ def selectData():
 		and c._Strain_key != cc._Strain_key
 		and c._Strain_key = s1._Strain_key
 		and cc._Strain_key = s2._Strain_key
-		and cc.cellLine not in ("Not Specified")
+		and cc.cellLine not in (\'Not Specified\')
 		'''
 
 	db.sql(cmd, None)
@@ -167,7 +158,7 @@ def qcreport():
 	fp.write(string.ljust('---------', 10) + TAB)
 	fp.write(string.ljust('------------', 25) + CRT*2)
 
-	results = db.sql('select * from #toUpdate1 order by sooKey, parentStrain', 'auto')
+	results = db.sql('select * from toUpdate1 order by sooKey, parentStrain', 'auto')
 	for r in results:
 
 	    fp.write(string.ljust(r['symbol'], 35) + TAB)
@@ -202,7 +193,7 @@ def qcreport():
 	fp.write(string.ljust('---------', 10) + TAB)
 	fp.write(string.ljust('------------', 25) + CRT*2)
 
-	results = db.sql('select * from #toUpdate2 order by mutantKey, parentStrain', 'auto')
+	results = db.sql('select * from toUpdate2 order by mutantKey, parentStrain', 'auto')
 	for r in results:
 
 	    fp.write(string.ljust(r['symbol'], 35) + TAB)
@@ -222,21 +213,13 @@ def doUpdate():
 	#
 
 
-	db.sql('create index idx_allele on #toUpdate1(_Allele_key)', None)
+	db.sql('create index idx_allele on toUpdate1(_Allele_key)', None)
 
-        if os.environ['DB_TYPE'] == 'postgres':
-		updateSQL = '''update ALL_Allele a
-				set _Strain_key = t.parentKey
-				from #toUpdate1 t
-				where t._Allele_key = a._Allele_key
+	updateSQL = '''update ALL_Allele a
+			set _Strain_key = t.parentKey
+			from toUpdate1 t
+			where t._Allele_key = a._Allele_key
 				'''
-	else:
-		updateSQL = '''update ALL_Allele
-				set _Strain_key = t.parentKey
-				from #toUpdate1 t, ALL_Allele a
-				where t._Allele_key = a._Allele_key
-				'''
-
 	db.sql(updateSQL, None)
 	db.commit()
 
@@ -248,11 +231,11 @@ def doUpdate():
 
 	#db.sql('alter table ALL_CellLine disable trigger', None)
 
-	#db.sql('create index idx_mutnatCellLineKey on #toUpdate2(mutantCellLineKey)', None)
+	#db.sql('create index idx_mutnatCellLineKey on toUpdate2(mutantCellLineKey)', None)
 
 	#updateSQL = '''update ALL_CellLine
 	#		set _Strain_key = t.parentKey
-	#		from #toUpdate2 t, ALL_CellLine a
+	#		from toUpdate2 t, ALL_CellLine a
 	#		where t.mutantCellLineKey = a._CellLine_key
 	#		'''
 
