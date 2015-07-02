@@ -25,7 +25,7 @@ import os
 import mgi_utils
 import db
 
-db.setTrace()
+db.setAutoTranslate(False)
 db.setAutoTranslateBE(False)
 
 COLDL = "|"

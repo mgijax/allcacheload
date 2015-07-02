@@ -75,7 +75,6 @@ import reportlib
 import mgi_utils
 import db
 
-db.setTrace()
 db.setAutoTranslateBE(False)
 
 COLDL = "|"
