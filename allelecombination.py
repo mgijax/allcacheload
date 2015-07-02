@@ -103,7 +103,7 @@ def processAll():
 	from ACC_Accession a 
 	where a._MGIType_key = 12 
 	and a._LogicalDB_key = 1 
-	and a.prefixPart = "MGI:" 
+	and a.prefixPart = 'MGI:' 
 	and a.preferred = 1
 	''', None)
 
@@ -185,13 +185,13 @@ def processNote(objectKey, notes, noteTypeKey):
 
     while len(notes) > 255:
 	noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
-		' values ((select * from noteKeyMax), %d, E"%s", %s, %s, current_date, current_date);\n' % (seqNum, notes[:255], userKey, userKey)
+		' values ((select * from noteKeyMax), %d, E\'%s\', %s, %s, current_date, current_date);\n' % (seqNum, notes[:255], userKey, userKey)
 	notes = notes[255:]
 	seqNum = seqNum + 1
 
     if len(notes) > 0:
 	noteCmd = noteCmd + 'insert into MGI_NoteChunk' + \
-		' values ((select * from noteKeyMax), %d, E"%s", %s, %s, current_date, current_date);\n' % (seqNum, notes, userKey, userKey)
+		' values ((select * from noteKeyMax), %d, E\'%s\', %s, %s, current_date, current_date);\n' % (seqNum, notes, userKey, userKey)
 
     # increment the MGI_Note._Note_key
 
@@ -250,7 +250,7 @@ def process(mode):
 	    c1.accID as mgiID1, 
 	    c2.accID as mgiID2, 
 	    g.sequenceNum, m.chromosome 
-	    from #toprocess p, 
+	    from toprocess p, 
 	    GXD_AllelePair g LEFT OUTER JOIN MRK_Marker m on (g._Marker_key = m._Marker_key),
 	    VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, 
 	    ACC_Accession c1, ACC_Accession c2
@@ -262,12 +262,12 @@ def process(mode):
 	    and g._Allele_key_1 = c1._Object_key 
 	    and c1._MGIType_key = 11 
 	    and c1._LogicalDB_key = 1 
-	    and c1.prefixPart = "MGI:" 
+	    and c1.prefixPart = 'MGI:' 
 	    and c1.preferred = 1 
 	    and g._Allele_key_2 = c2._Object_key 
 	    and c2._MGIType_key = 11 
 	    and c2._LogicalDB_key = 1 
-	    and c2.prefixPart = "MGI:" 
+	    and c2.prefixPart = 'MGI:' 
 	    and c2.preferred = 1 
 	    union 
 	    select p._Genotype_key,
@@ -281,7 +281,7 @@ def process(mode):
 	    c1.accID as mgiID1, 
 	    null as mgiID2, 
 	    g.sequenceNum, m.chromosome 
-	    from #toprocess p, 
+	    from toprocess p, 
 	    GXD_AllelePair g LEFT OUTER JOIN MRK_Marker m on (g._Marker_key = m._Marker_key),
 	    VOC_Term t1, VOC_Term t2, ALL_Allele a1, ACC_Accession c1
 	    where p._Genotype_key = g._Genotype_key 
@@ -292,7 +292,7 @@ def process(mode):
 	    and g._Allele_key_1 = c1._Object_key 
 	    and c1._MGIType_key = 11 
 	    and c1._LogicalDB_key = 1 
-	    and c1.prefixPart = "MGI:" 
+	    and c1.prefixPart = 'MGI:' 
 	    and c1.preferred = 1 
 	    )
 	    order by _Genotype_key, sequenceNum;\n'''
@@ -677,24 +677,18 @@ scriptName = os.path.basename(sys.argv[0])
 
 # all of these invocations will only affect a certain subset of data
 
-try:
 
-    if scriptName == 'allelecombination.py':
-        processAll()
+if scriptName == 'allelecombination.py':
+    processAll()
 
-    elif scriptName == 'allelecombinationByAllele.py':
-        processByAllele(objectKey)
+elif scriptName == 'allelecombinationByAllele.py':
+    processByAllele(objectKey)
 
-    elif scriptName == 'allelecombinationByMarker.py':
-        processByMarker(objectKey)
+elif scriptName == 'allelecombinationByMarker.py':
+    processByMarker(objectKey)
 
-    elif scriptName == 'allelecombinationByGenotype.py':
-        processByGenotype(objectKey)
-
-except:
-
-    print 'exeception during generation of allele-combination report\n'
-    sys.stdout.flush()
+elif scriptName == 'allelecombinationByGenotype.py':
+    processByGenotype(objectKey)
     
 db.commit()
 db.useOneConnection(0)
