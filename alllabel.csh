@@ -18,8 +18,6 @@ setenv TABLE ALL_Label
 
 date | tee -a ${LOG}
 
-echo 'running...' ${DB_TYPE}
-
 # Create the bcp file
 
 ./alllabel.py | tee -a ${LOG}

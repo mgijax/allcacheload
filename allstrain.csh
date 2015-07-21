@@ -14,7 +14,6 @@ touch $LOG
 
 date | tee -a ${LOG}
 
-echo 'running version...' ${DB_TYPE} >> $LOG
 ${ALLCACHELOAD}/allstrain.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
 
 date | tee -a ${LOG}
