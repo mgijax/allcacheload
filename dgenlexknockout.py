@@ -67,6 +67,9 @@ import loadlib
 
 #globals
 
+db.setAutoTranslate(False)
+db.setAutoTranslateBE(False)
+
 TAB = '\t'		# tab
 DL = os.environ['COLDELIM']
 
