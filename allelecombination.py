@@ -609,7 +609,7 @@ def process(mode):
 	    print processNote(g, displayNotes1, combNoteType1)
 	    print processNote(g, displayNotes1, combNoteType2)
 	    print processNote(g, displayNotes1, combNoteType3)
-	    print cmd
+	    #print cmd
 
 	    cmd = cmd + "commit transaction;\n"
 
