@@ -93,16 +93,14 @@ querySQL1 = '''
         select distinct
           ag._Allele_key, 
           aa._Allele_Type_key,
-          e._Structure_key,
-          s._System_key,
+          e._EMAPA_Term_key,
+          e._Stage_key,
           e._Assay_key,
           aa.symbol,
           aa.name,
 	  t1.term as alleleType,
           nc.note,
-          sn.structure,
-          t2.term as system,
-	  s.printName,
+          t2.term as emapaTerm,
 	  e.age,
 	  e.ageMin,
 	  e.ageMax,
@@ -113,8 +111,6 @@ querySQL1 = '''
         from 
           GXD_Expression e, 
           GXD_AlleleGenotype ag, 
-          GXD_Structure s, 
-          GXD_StructureName sn, 
           VOC_Term t1,
           VOC_Term t2,
           MGI_Note n,
@@ -127,9 +123,7 @@ querySQL1 = '''
           and ag._Allele_key = aa._Allele_key
 	  and aa._Allele_Status_key in (847114, 3983021)
           and aa._Allele_Type_key = t1._Term_key
-          and e._Structure_key = s._Structure_key
-          and s._StructureName_key = sn._StructureName_key
-          and s._System_key = t2._Term_key
+          and e._EMAPA_Term_key = t2._Term_key
           and ag._Allele_key = n._Object_key
           and n._Note_key = nc._Note_key
           and n._NoteType_key = 1034
@@ -168,8 +162,8 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = "insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,current_date,current_date)"
-insertSQL2 = "insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s',null,null,null,null,null,null,null,null,%s,%s,current_date,current_date)"
+insertSQL1 = "insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,current_date,current_date)"
+insertSQL2 = "insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,%s,current_date,current_date)"
 
 def showUsage():
 	'''
@@ -273,17 +267,15 @@ def process(mode):
 	   db.sql(insertSQL1 % (str(nextMaxKey),
 			       r['_Allele_key'],
                                r['_Allele_Type_key'],
-		               r['_Structure_key'],
-		               r['_System_key'],
+		               r['_EMAPA_Term_key'],
+		               r['_Stage_key'],
 		               r['_Assay_key'],
 		               r['accID'],
 		               r['symbol'],
 		               r['name'],
 		               r['alleleType'],
 		               r['note'],
-		               r['structure'],
-		               r['system'],
-		               r['printName'],
+		               r['emapaTerm'],
 		               r['age'],
 		               r['ageMin'],
 		               r['ageMax'],
@@ -296,17 +288,15 @@ def process(mode):
             outBCP.write(str(nextMaxKey) + COLDL +
 		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
-		     mgi_utils.prvalue(r['_Structure_key']) + COLDL +
-		     mgi_utils.prvalue(r['_System_key']) + COLDL +
+		     mgi_utils.prvalue(r['_EMAPA_Term_key']) + COLDL +
+		     mgi_utils.prvalue(r['_Stage_key']) + COLDL +
 		     mgi_utils.prvalue(r['_Assay_key']) + COLDL +
 		     mgi_utils.prvalue(r['accID']) + COLDL +
 		     mgi_utils.prvalue(r['symbol']) + COLDL +
 		     mgi_utils.prvalue(r['name']) + COLDL +
 		     mgi_utils.prvalue(r['alleleType']) + COLDL +
 		     mgi_utils.prvalue(r['note']) + COLDL +
-		     mgi_utils.prvalue(r['structure']) + COLDL +
-		     mgi_utils.prvalue(r['system']) + COLDL +
-		     mgi_utils.prvalue(r['printName']) + COLDL +
+		     mgi_utils.prvalue(r['emapaTerm']) + COLDL +
 		     mgi_utils.prvalue(r['age']) + COLDL +
 		     mgi_utils.prvalue(r['ageMin']) + COLDL +
 		     mgi_utils.prvalue(r['ageMax']) + COLDL +
@@ -349,8 +339,6 @@ def process(mode):
 		         mgi_utils.prvalue(r['name']) + COLDL +
 		         mgi_utils.prvalue(r['alleleType']) + COLDL +
 		         mgi_utils.prvalue(r['note']) + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
@@ -415,13 +403,13 @@ def main():
 
     try:
         if scriptName == 'allelecrecache.py':
-            processAll()
+           processAll()
     
         elif scriptName == 'allelecrecacheByAllele.py':
-            processByAllele(objectKey)
+           processByAllele(objectKey)
     
         elif scriptName == 'allelecrecacheByAssay.py':
-            processByAssay(objectKey)
+           processByAssay(objectKey)
 
     except:
 	bailOut('problem finding/running an invocation')
