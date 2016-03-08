@@ -162,8 +162,8 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = "insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,current_date,current_date)"
-insertSQL2 = "insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,%s,current_date,current_date)"
+insertSQL1 = "insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())"
+insertSQL2 = "insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,%s,now(),now())"
 
 def showUsage():
 	'''
