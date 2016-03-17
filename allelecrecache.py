@@ -12,8 +12,6 @@
 #	(MGI_Note._NoteType_key = 1034)
 # It is assumed that the Driver Note will NOT exceed 255 characters
 #
-# Requirements Satisfied by This Program:
-#
 # Usage:
 #
 #	allelecrecache.py
@@ -35,23 +33,13 @@
 #		-K${OBJECTKEY} = _Assay_key (example "35989")
 #		process for given assay
 #
-# Envvars:
-#
-# Inputs:
-#
 # Outputs:
-#
-# Exit Codes:
-#
-# Assumes:
-#
-# Bugs:
-#
-# Implementation:
-#
-#    Modules:
+#	${DATALOADSOUTPUT}/mgi/allcacheload/output/ALL_Cre_Cache.bcp
 #
 # Modification History:
+#
+# 03/15/2016	lec
+#	- TR12223/gxd anatomy II/Cre Systems
 #
 # 04/18/2013	lec
 #	- TR11248/add 'age'
@@ -71,7 +59,6 @@ import os
 import getopt
 import string
 import loadlib
-import reportlib
 import mgi_utils
 import db
 
@@ -80,8 +67,6 @@ db.setAutoTranslateBE(False)
 
 COLDL = "|"
 LINEDL = "\n"
-
-#COLDL = '&#&'
 
 userKey = 0
 loaddate = loadlib.loaddate
@@ -107,7 +92,9 @@ querySQL1 = '''
           e.expressed,
 	  e.hasImage,
 	  a.accID
+
 	INTO TEMPORARY TABLE toprocess1
+
         from 
           GXD_Expression e, 
           GXD_AlleleGenotype ag, 
@@ -117,6 +104,7 @@ querySQL1 = '''
           MGI_NoteChunk nc,
           ALL_Allele aa,
 	  ACC_Accession a
+
         where e._AssayType_key in (9,10,11)
           and e._GenoType_key = ag._GenoType_key
           and e._Marker_key = ag._Marker_key
@@ -134,12 +122,14 @@ querySQL1 = '''
 	  and a.preferred = 1
 	'''
 
+#	  and aa.symbol like 'Acan%'
+
 # select Cre alleles that have no genotype/structure information
 # status = approved, autoload ONLY
 
 querySQL2 = '''
 	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
-		t1.term as alleleType, nc.note, a.accID
+		t1.term as alleleType, nc.note, a.accID, null as cresystemlabel
 	INTO TEMPORARY TABLE toprocess2
 	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc, ACC_Accession a
 	where aa._Allele_Status_key in (847114, 3983021)
@@ -162,8 +152,16 @@ deleteSQL = ''
 deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
-insertSQL1 = "insert into ALL_Cre_Cache values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())"
-insertSQL2 = "insert into ALL_Cre_Cache values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,%s,now(),now())"
+insertSQL1 = '''insert into ALL_Cre_Cache 
+	values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
+	'''
+insertSQL2 = '''insert into ALL_Cre_Cache 
+	values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
+	'''
+# for cre systems 
+embryoLabel = ''
+mouseLabel = ''
+creSystemsDict = {}
 
 def showUsage():
 	'''
@@ -182,17 +180,8 @@ def showUsage():
 	sys.stderr.write(usage)
 	sys.exit(1)
  
-def bailOut(s):
-
-    sys.stderr.write('Error:  ' + s + '\n')
-    sys.exit(1)
-
 def processAll():
     # Purpose: processes all Cre data
-    # Returns:
-    # Assumes:
-    # Effects:
-    # Throws:
 
     db.sql(querySQL1, None)
     db.sql(querySQL2, None)
@@ -200,11 +189,6 @@ def processAll():
 
 def processByAllele(objectKey):
     # Purpose: processes data for a specific Allele
-    # Returns:
-    # Assumes:
-    # Effects:
-    # Throws:
-
 
     global deleteSQL
 
@@ -215,10 +199,6 @@ def processByAllele(objectKey):
 
 def processByAssay(objectKey):
     # Purpose: processes data for a specific Allele
-    # Returns:
-    # Assumes:
-    # Effects:
-    # Throws:
 
     global deleteSQL
 
@@ -228,12 +208,138 @@ def processByAssay(objectKey):
     isQuerySQL2 = 0
     process('sql')
 
+def initCreSystems():
+    # Purpose: initialize Cre System lookups
+    #
+
+    global embryoLabel, mouseLabel
+    global creSystemsDict
+
+    #
+    # embryo and mouse cre-labels
+    #
+
+    embryoLabel = db.sql('''select s.label 
+	    from VOC_Term v, MGI_SetMember s 
+	    where v._Vocab_key= 90
+	    and v.term = 'embryo'
+	    and v._Term_key = s._Object_key
+	    and s._Set_key = 1047''', 'auto')[0]['label']
+
+    mouseLabel = db.sql('''select s.label 
+	    from VOC_Term v, MGI_SetMember s 
+	    where v._Vocab_key= 90
+	    and v.term = 'mouse'
+	    and v._Term_key = s._Object_key
+	    and s._Set_key = 1047''', 'auto')[0]['label']
+
+    #
+    # translates EMAPA term to Cre System
+    #
+
+    results = db.sql('''
+        (
+        -- expression term is descendent of cre system term
+	select distinct e._EMAPA_Term_key, e._Stage_key, v2.term, s.label
+	from GXD_Expression e, DAG_Closure c, 
+	        VOC_Term v1, VOC_Term v2,
+		MGI_SetMember s
+	where e._AssayType_key in (9,10,11)
+	and e._EMAPA_Term_key = v1._Term_key
+	and v1._Term_key = c._DescendentObject_key
+	and c._MGIType_key = 13
+	and c._AncestorObject_key = v2._Term_key
+	and v2._Term_key = s._Object_key
+	and s._Set_key = 1047
+        union
+        -- expression term equals cre system term
+        select distinct e._EMAPA_Term_key, e._Stage_key, null, s.label
+        from GXD_Expression e, MGI_SetMember s
+        where e._AssayType_key in (9,10,11)
+        and e._EMAPA_Term_key = s._Object_key
+        and s._Set_key = 1047
+        )
+        order by _EMAPA_Term_key, _Stage_key
+	''', 'auto')
+
+    for r in results:
+        key = r['_EMAPA_Term_key']
+        value = r 
+        if not creSystemsDict.has_key(key):
+            creSystemsDict[key] = []
+        creSystemsDict[key].append(r)
+
+def processCreSystems(emapaKey, emapaTerm, stageKey):
+    # Purpose: determine which Cre Systems are to be included in the Cre cache
+    #
+    # for each EMAPA used in the given Assay...
+    # using the EMAPA/DAG (moving up the DAG tree)
+    #
+    # if Assay contains Cre Systems other than 'embryo' or 'mouse', then use those Cre Systems
+    #
+    # else if 'embryo' and stage < 27, then use 'embryo'
+    #
+    # else use 'mouse' and stage >= 27, then use 'mouse'
+    #
+    # example:
+    #	EMAPA term = 'sacral vertebral cartilage condensation' 
+    #   in DAG/parent, translates to 'skeletal system', 'mesanchyme', 'embryo', 'mouse'
+    #   in Cre System, these translate to 'skeletal system', 'mesenchyme', 'embryo-other', 'postnatal-other'
+    #   what gets included in cache table : 'skeletal system', 'mesenchyme'
+    #
+    #   EMAPA term = 'cartilage'
+    #   in DAG/parent, translates to 'embryo', stage 23
+    #   what gets included in cache table : 'embryo-other'
+    #
+    #   EMAPA term = 'cartilage'
+    #   in DAG/parent, translates to 'embryo', stage 27
+    #   what gets included in cache table : 'mouse-other'
+    #
+
+    creSystemsList = []
+    isEmbryo = 0
+    isMouse = 0
+
+    for c in creSystemsDict[emapaKey]:
+
+	# if cre-system label is empty, use the emapa term
+        if c['label'] == None:
+            creLabel = c['term']
+	# else use the cre-system label (mgi_setmember.label)
+        else:
+            creLabel = c['label']
+
+        if c['term'] == 'embryo' and stageKey < 27:
+	    isEmbryo = 1
+
+        elif c['term'] == 'embryo' and stageKey >= 27:
+	    isMouse = 1
+
+        elif c['term'] == 'mouse':
+	    isMouse = 1
+
+	# or any other system (no duplicates)
+        elif creLabel not in creSystemsList:
+            creSystemsList.append(creLabel)
+
+    #
+    # after all expression results for given Assay have been looked at...
+    #
+
+    if len(creSystemsList) == 0 and isEmbryo:
+        creSystemsList.append(embryoLabel)
+
+    elif len(creSystemsList) == 0 and isMouse:
+        creSystemsList.append(mouseLabel)
+
+    # else if no other systems involved in the Assay, use mouse
+    elif len(creSystemsList) == 0:
+        creSystemsList.append(mouseLabel);
+
+    return(creSystemsList)
+
 def process(mode):
     # Purpose: process data using either 'sql' or 'bcp' mode
-    # Returns:
-    # Assumes:
-    # Effects:
-    # Throws:
 
     db.sql('create index idx1 on toprocess1(_Allele_key)', None)
     db.sql('create index idx2 on toprocess2(_Allele_key)', None)
@@ -262,9 +368,11 @@ def process(mode):
     for r in results:
 
         nextMaxKey = nextMaxKey + 1
+        creSystemsList = processCreSystems(r['_EMAPA_Term_key'], r['emapaTerm'], r['_Stage_key']) 
 
 	if mode == 'sql':
-	   db.sql(insertSQL1 % (str(nextMaxKey),
+	    for printCreLabel in creSystemsList:
+	        db.sql(insertSQL1 % (str(nextMaxKey),
 			       r['_Allele_key'],
                                r['_Allele_Type_key'],
 		               r['_EMAPA_Term_key'],
@@ -281,11 +389,13 @@ def process(mode):
 		               r['ageMax'],
 		               r['expressed'],
 		               r['hasImage'],
+		               printCreLabel,
 		               userKey, userKey), None)
 
         else:
             r['note'] = r['note'].replace('\n','\\n')
-            outBCP.write(str(nextMaxKey) + COLDL +
+	    for printCreLabel in creSystemsList:
+                outBCP.write(str(nextMaxKey) + COLDL +
 		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
 		     mgi_utils.prvalue(r['_EMAPA_Term_key']) + COLDL +
@@ -302,11 +412,13 @@ def process(mode):
 		     mgi_utils.prvalue(r['ageMax']) + COLDL +
 		     mgi_utils.prvalue(r['expressed']) + COLDL +
 		     mgi_utils.prvalue(r['hasImage']) + COLDL +
+		     mgi_utils.prvalue(printCreLabel) + COLDL +
 		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		     loaddate + COLDL + loaddate + LINEDL)
 
     #
     # select the remaining Cre data (those alleles without genotypes/structures)
+    # cre-system is always empty (null)
     #
 
     if isQuerySQL2 == 1:
@@ -317,7 +429,7 @@ def process(mode):
             nextMaxKey = nextMaxKey + 1
 
 	    if mode == 'sql':
-	       db.sql(insertSQL2 % (str(nextMaxKey) ,
+	        db.sql(insertSQL2 % (str(nextMaxKey) ,
 				   r['_Allele_key'],
                                    r['_Allele_Type_key'],
 		                   r['accID'],
@@ -345,13 +457,13 @@ def process(mode):
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
+		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		         loaddate + COLDL + loaddate + LINEDL)
 
     if mode == 'bcp':
        outBCP.close()
 
-#
 # Main Routine
 #
 
@@ -401,18 +513,16 @@ def main():
 
     # all of these invocations will only affect a certain subset of data
 
-    try:
-        if scriptName == 'allelecrecache.py':
-           processAll()
-    
-        elif scriptName == 'allelecrecacheByAllele.py':
-           processByAllele(objectKey)
-    
-        elif scriptName == 'allelecrecacheByAssay.py':
-           processByAssay(objectKey)
+    initCreSystems()
 
-    except:
-	bailOut('problem finding/running an invocation')
+    if scriptName == 'allelecrecache.py':
+        processAll()
+    
+    elif scriptName == 'allelecrecacheByAllele.py':
+        processByAllele(objectKey)
+    
+    elif scriptName == 'allelecrecacheByAssay.py':
+        processByAssay(objectKey)
 
     db.commit()
     db.useOneConnection(0)
@@ -421,3 +531,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
