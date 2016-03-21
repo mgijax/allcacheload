@@ -235,6 +235,7 @@ def initCreSystems():
 
     #
     # translates EMAPA term to Cre System
+    # use EMAPA/DAG
     #
 
     results = db.sql('''
@@ -326,9 +327,11 @@ def processCreSystems(emapaKey, emapaTerm, stageKey):
     # after all expression results for given Assay have been looked at...
     #
 
+    # embryo
     if len(creSystemsList) == 0 and isEmbryo:
         creSystemsList.append(embryoLabel)
 
+    # mouse
     elif len(creSystemsList) == 0 and isMouse:
         creSystemsList.append(mouseLabel)
 
@@ -511,9 +514,10 @@ def main():
 
     scriptName = os.path.basename(sys.argv[0])
 
-    # all of these invocations will only affect a certain subset of data
-
+    # initialize the cre-system lookups
     initCreSystems()
+
+    # all of these invocations will only affect a certain subset of data
 
     if scriptName == 'allelecrecache.py':
         processAll()
