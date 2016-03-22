@@ -367,10 +367,10 @@ def process(mode):
     else:
 	nextMaxKey = 0
 
+    nextMaxKey = nextMaxKey + 1
     results = db.sql('select * from toprocess1', 'auto')
     for r in results:
 
-        nextMaxKey = nextMaxKey + 1
         creSystemsList = processCreSystems(r['_EMAPA_Term_key'], r['emapaTerm'], r['_Stage_key']) 
 
 	if mode == 'sql':
@@ -394,6 +394,7 @@ def process(mode):
 		               r['hasImage'],
 		               printCreLabel,
 		               userKey, userKey), None)
+                nextMaxKey = nextMaxKey + 1
 
         else:
             r['note'] = r['note'].replace('\n','\\n')
@@ -418,6 +419,7 @@ def process(mode):
 		     mgi_utils.prvalue(printCreLabel) + COLDL +
 		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
 		     loaddate + COLDL + loaddate + LINEDL)
+                nextMaxKey = nextMaxKey + 1
 
     #
     # select the remaining Cre data (those alleles without genotypes/structures)
@@ -430,7 +432,6 @@ def process(mode):
         for r in results:
 
             nextMaxKey = nextMaxKey + 1
-
 	    if mode == 'sql':
 	        db.sql(insertSQL2 % (str(nextMaxKey) ,
 				   r['_Allele_key'],
