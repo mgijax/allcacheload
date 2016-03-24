@@ -123,6 +123,7 @@ querySQL1 = '''
 	'''
 
 #	  and aa.symbol like 'Acan%'
+#	  and aa.symbol like 'Agrp<tm1(cre)Lowl>'
 
 # select Cre alleles that have no genotype/structure information
 # status = approved, autoload ONLY
@@ -252,11 +253,14 @@ def initCreSystems():
 	and c._AncestorObject_key = v2._Term_key
 	and v2._Term_key = s._Object_key
 	and s._Set_key = 1047
-        union
+
+        union all
+
         -- expression term equals cre system term
-        select distinct e._EMAPA_Term_key, e._Stage_key, null, s.label
-        from GXD_Expression e, MGI_SetMember s
+        select distinct e._EMAPA_Term_key, e._Stage_key, v1.term, s.label
+        from GXD_Expression e, MGI_SetMember s, VOC_Term v1
         where e._AssayType_key in (9,10,11)
+	and e._EMAPA_Term_key = v1._Term_key
         and e._EMAPA_Term_key = s._Object_key
         and s._Set_key = 1047
         )
@@ -269,6 +273,8 @@ def initCreSystems():
         if not creSystemsDict.has_key(key):
             creSystemsDict[key] = []
         creSystemsDict[key].append(r)
+
+    #and e._EMAPA_Term_key in (17225762,17227149,17225802)
 
 def processCreSystems(emapaKey, emapaTerm, stageKey):
     # Purpose: determine which Cre Systems are to be included in the Cre cache
