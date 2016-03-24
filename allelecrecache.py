@@ -274,8 +274,6 @@ def initCreSystems():
             creSystemsDict[key] = []
         creSystemsDict[key].append(r)
 
-    #and e._EMAPA_Term_key in (17225762,17227149,17225802)
-
 def processCreSystems(emapaKey, emapaTerm, stageKey):
     # Purpose: determine which Cre Systems are to be included in the Cre cache
     #
