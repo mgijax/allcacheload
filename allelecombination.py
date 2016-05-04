@@ -175,25 +175,12 @@ def processNote(objectKey, notes, noteTypeKey):
     # Effects:
     # Throws:
 
-    if len(notes) > 255:
-	notes = notes.replace('\\', ' \\')
-
     noteCmd = '''insert into MGI_Note values ((select * from noteKeyMax), %s, %s, %s, %s, %s, now(), now());\n
 	      ''' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
 
-    seqNum = 1
-
-    while len(notes) > 255:
-	noteCmd = noteCmd + \
-		'''insert into MGI_NoteChunk values ((select * from noteKeyMax), %d, '%s', %s, %s, now(), now());\n
-		''' % (seqNum, notes[:255], userKey, userKey)
-	notes = notes[255:]
-	seqNum = seqNum + 1
-
-    if len(notes) > 0:
-	noteCmd = noteCmd + \
-		'''insert into MGI_NoteChunk values ((select * from noteKeyMax), %d, '%s', %s, %s, now(), now());\n
-		''' % (seqNum, notes, userKey, userKey)
+    noteCmd = noteCmd + \
+        '''insert into MGI_NoteChunk values ((select * from noteKeyMax), 1, '%s', %s, %s, now(), now());\n
+	''' % (notes, userKey, userKey)
 
     # increment the MGI_Note._Note_key
 

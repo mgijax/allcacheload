@@ -5,6 +5,9 @@
 #
 # History
 #
+# lec	01/08/2016
+# 	- TR12223/gxd anatomy II
+#
 # lec	09/01/2009
 #	- TR9164/cre
 #
@@ -19,31 +22,6 @@ rm -rf $LOG
 touch $LOG
 
 date | tee -a ${LOG}
-
-#
-# ad system loader
-#   . this product re-sets the GXD_Structure._System_key 
-#     for structures where inheritSystem = 1 (true)
-#   . it is important to keep these field set correctly for the Cre cache
-#
-# depending on the modification activity of the 
-# EI:Anat. Dictionary module/Anatomical System terms (AST) for high-level structures
-# (those where inheritSystem = 0 (false))
-# we should either turn this off or on
-#
-# Turn this OFF if:
-#   .  no or low activity
-#   .  the EI:AD module:"Refresh AD System Terms" is run AFTER an AST modification
-#
-# Turn this ON if:
-#   . high activity
-#   . the EI:AD module:"Refresh AD System Terms" is NOT being run AFTER an AST modification
-#
-# for the iniital TR9797/TR9163, we are setting this to ON
-#
-
-# temporary turn off for testing
-${ADSYSTEMLOAD}/adsystemload.py ${PYTHON_CMD} >> ${LOG}
 
 # Create the bcp file
 
