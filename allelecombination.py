@@ -61,9 +61,6 @@ import loadlib
 import reportlib
 import db
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 notenewline = '\\n'
 mgiTypeKey = 12
 userKey = 0

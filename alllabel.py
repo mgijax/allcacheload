@@ -22,15 +22,13 @@
 
 import sys
 import os
+import loadlib
 import mgi_utils
 import db
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 COLDL = "|"
 LINEDL = "\n"
-loaddate = mgi_utils.date("%m/%d/%Y")
+loaddate = loadlib.loaddate
 
 #
 # priority	label type	label name

@@ -51,9 +51,6 @@ import string
 import reportlib
 import db
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 CRT = reportlib.CRT
 SPACE = reportlib.SPACE
 TAB = reportlib.TAB

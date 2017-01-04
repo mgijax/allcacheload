@@ -62,9 +62,6 @@ import loadlib
 import mgi_utils
 import db
 
-db.setAutoTranslate(False)
-db.setAutoTranslateBE(False)
-
 COLDL = "|"
 LINEDL = "\n"
 
