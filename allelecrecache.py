@@ -8,9 +8,7 @@
 # Purpose:
 #
 # To load the Allele Cre Cache table (ALL_Cre_Cache)
-# Cre alleles are those alleles that contain Driver Notes
-#	(MGI_Note._NoteType_key = 1034)
-# It is assumed that the Driver Note will NOT exceed 255 characters
+# Cre alleles are those alleles that contain Driver Genes  (MGI_Relationship where _Category_key = 1006)
 #
 # Usage:
 #
@@ -62,6 +60,8 @@ import loadlib
 import mgi_utils
 import db
 
+db.setTrace(True)
+
 COLDL = "|"
 LINEDL = "\n"
 
@@ -81,7 +81,7 @@ querySQL1 = '''
           aa.symbol,
           aa.name,
 	  t1.term as alleleType,
-          nc.note,
+          m.symbol as driverGene,
           t2.term as emapaTerm,
 	  e.age,
 	  e.ageMin,
@@ -97,8 +97,8 @@ querySQL1 = '''
           GXD_AlleleGenotype ag, 
           VOC_Term t1,
           VOC_Term t2,
-          MGI_Note n,
-          MGI_NoteChunk nc,
+	  MGI_Relationship ms,
+	  MRK_Marker m,
           ALL_Allele aa,
 	  ACC_Accession a
 
@@ -109,9 +109,9 @@ querySQL1 = '''
 	  and aa._Allele_Status_key in (847114, 3983021)
           and aa._Allele_Type_key = t1._Term_key
           and e._EMAPA_Term_key = t2._Term_key
-          and ag._Allele_key = n._Object_key
-          and n._Note_key = nc._Note_key
-          and n._NoteType_key = 1034
+          and ag._Allele_key = ms._Object_key_1
+	  and ms._Category_key = 1006
+	  and ms._Object_key_2 = m._Marker_key
 	  and aa._Allele_key = a._Object_key
 	  and a._LogicalDB_key = 1
 	  and a._MGIType_key = 11
@@ -127,14 +127,14 @@ querySQL1 = '''
 
 querySQL2 = '''
 	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
-		t1.term as alleleType, nc.note, a.accID, null as cresystemlabel
+		t1.term as alleleType, m.symbol as driverGene, a.accID, null as cresystemlabel
 	INTO TEMPORARY TABLE toprocess2
-	from ALL_Allele aa, VOC_Term t1, MGI_Note n, MGI_NoteChunk nc, ACC_Accession a
+	from ALL_Allele aa, VOC_Term t1, MGI_Relationship ms, MRK_Marker m, ACC_Accession a
 	where aa._Allele_Status_key in (847114, 3983021)
 	and aa._Allele_Type_key = t1._Term_key
-	and aa._Allele_key = n._Object_key
-      	and n._NoteType_key = 1034
-    	and n._Note_key = nc._Note_key
+        and aa._Allele_key = ms._Object_key_1
+	and ms._Category_key = 1006
+	and ms._Object_key_2 = m._Marker_key
 	and aa._Allele_key = a._Object_key
 	and a._LogicalDB_key = 1
 	and a._MGIType_key = 11
@@ -386,7 +386,7 @@ def process(mode):
 		               r['symbol'],
 		               r['name'],
 		               r['alleleType'],
-		               r['note'],
+		               r['driverGene'],
 		               r['emapaTerm'],
 		               r['age'],
 		               r['ageMin'],
@@ -410,7 +410,7 @@ def process(mode):
 		     mgi_utils.prvalue(r['symbol']) + COLDL +
 		     mgi_utils.prvalue(r['name']) + COLDL +
 		     mgi_utils.prvalue(r['alleleType']) + COLDL +
-		     mgi_utils.prvalue(r['note']) + COLDL +
+		     mgi_utils.prvalue(r['driverGene']) + COLDL +
 		     mgi_utils.prvalue(r['emapaTerm']) + COLDL +
 		     mgi_utils.prvalue(r['age']) + COLDL +
 		     mgi_utils.prvalue(r['ageMin']) + COLDL +
