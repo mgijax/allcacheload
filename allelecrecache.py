@@ -398,7 +398,6 @@ def process(mode):
                 nextMaxKey = nextMaxKey + 1
 
         else:
-            r['note'] = r['note'].replace('\n','\\n')
 	    for printCreLabel in creSystemsList:
                 outBCP.write(str(nextMaxKey) + COLDL +
 		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
@@ -441,10 +440,9 @@ def process(mode):
 		                   r['symbol'],
 		                   r['name'],
 		                   r['alleleType'],
-		                   r['note'],
+		                   r['driverGene'],
 		                   userKey, userKey), None)
             else:
-                r['note'] = r['note'].replace('\n','\\n')
                 outBCP.write(str(nextMaxKey) + COLDL +
 			 mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
@@ -455,7 +453,7 @@ def process(mode):
 		         mgi_utils.prvalue(r['symbol']) + COLDL +
 		         mgi_utils.prvalue(r['name']) + COLDL +
 		         mgi_utils.prvalue(r['alleleType']) + COLDL +
-		         mgi_utils.prvalue(r['note']) + COLDL +
+		         mgi_utils.prvalue(r['driverGene']) + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
 		         mgi_utils.prvalue('') + COLDL +
