@@ -117,6 +117,14 @@ querySQL1 = '''
 	  and a._MGIType_key = 11
 	  and a.prefixPart = 'MGI:'
 	  and a.preferred = 1
+
+        -- recombinase attribute/subtype
+        and exists (select 1 from VOC_Annot va  
+                where va._AnnotType_key = 1014
+                and ag._Allele_key = va._Object_key
+                and va._Term_key = 11025588
+                )
+
 	'''
 
 #	  and aa.symbol like 'Acan%'
@@ -141,6 +149,12 @@ querySQL2 = '''
 	and a.preferred = 1
 	and a.private = 0
 	and not exists (select 1 from toprocess1 t where aa._Allele_key = t._Allele_key)
+        -- recombinase attribute/subtype
+        and exists (select 1 from VOC_Annot va  
+                where va._AnnotType_key = 1014
+                and aa._Allele_key = va._Object_key
+                and va._Term_key = 11025588
+                )
 	'''
 
 #is there a query 2?  default = true (1)
