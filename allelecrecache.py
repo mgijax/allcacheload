@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 
 #
 # Program: allelecrecache.py
@@ -80,43 +79,43 @@ querySQL1 = '''
           e._Assay_key,
           aa.symbol,
           aa.name,
-	  t1.term as alleleType,
+          t1.term as alleleType,
           m.symbol as driverGene,
           t2.term as emapaTerm,
-	  e.age,
-	  e.ageMin,
-	  e.ageMax,
+          e.age,
+          e.ageMin,
+          e.ageMax,
           e.expressed,
-	  e.hasImage,
-	  a.accID
+          e.hasImage,
+          a.accID
 
-	INTO TEMPORARY TABLE toprocess1
+        INTO TEMPORARY TABLE toprocess1
 
         from 
           GXD_Expression e, 
           GXD_AlleleGenotype ag, 
           VOC_Term t1,
           VOC_Term t2,
-	  MGI_Relationship ms,
-	  MRK_Marker m,
+          MGI_Relationship ms,
+          MRK_Marker m,
           ALL_Allele aa,
-	  ACC_Accession a
+          ACC_Accession a
 
         where e._AssayType_key in (9,10,11)
           and e._GenoType_key = ag._GenoType_key
           and e._Marker_key = ag._Marker_key
           and ag._Allele_key = aa._Allele_key
-	  and aa._Allele_Status_key in (847114, 3983021)
+          and aa._Allele_Status_key in (847114, 3983021)
           and aa._Allele_Type_key = t1._Term_key
           and e._EMAPA_Term_key = t2._Term_key
           and ag._Allele_key = ms._Object_key_1
-	  and ms._Category_key = 1006
-	  and ms._Object_key_2 = m._Marker_key
-	  and aa._Allele_key = a._Object_key
-	  and a._LogicalDB_key = 1
-	  and a._MGIType_key = 11
-	  and a.prefixPart = 'MGI:'
-	  and a.preferred = 1
+          and ms._Category_key = 1006
+          and ms._Object_key_2 = m._Marker_key
+          and aa._Allele_key = a._Object_key
+          and a._LogicalDB_key = 1
+          and a._MGIType_key = 11
+          and a.prefixPart = 'MGI:'
+          and a.preferred = 1
 
         -- recombinase attribute/subtype
         and exists (select 1 from VOC_Annot va  
@@ -125,7 +124,7 @@ querySQL1 = '''
                 and va._Term_key = 11025588
                 )
 
-	'''
+        '''
 
 #	  and aa.symbol like 'Acan%'
 #	  and aa.symbol like 'Agrp<tm1(cre)Lowl>'
@@ -134,28 +133,28 @@ querySQL1 = '''
 # status = approved, autoload ONLY
 
 querySQL2 = '''
-	select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
-		t1.term as alleleType, m.symbol as driverGene, a.accID, null as cresystemlabel
-	INTO TEMPORARY TABLE toprocess2
-	from ALL_Allele aa, VOC_Term t1, MGI_Relationship ms, MRK_Marker m, ACC_Accession a
-	where aa._Allele_Status_key in (847114, 3983021)
-	and aa._Allele_Type_key = t1._Term_key
+        select distinct aa._Allele_key, aa._Allele_Type_key, aa.symbol, aa.name, 
+                t1.term as alleleType, m.symbol as driverGene, a.accID, null as cresystemlabel
+        INTO TEMPORARY TABLE toprocess2
+        from ALL_Allele aa, VOC_Term t1, MGI_Relationship ms, MRK_Marker m, ACC_Accession a
+        where aa._Allele_Status_key in (847114, 3983021)
+        and aa._Allele_Type_key = t1._Term_key
         and aa._Allele_key = ms._Object_key_1
-	and ms._Category_key = 1006
-	and ms._Object_key_2 = m._Marker_key
-	and aa._Allele_key = a._Object_key
-	and a._LogicalDB_key = 1
-	and a._MGIType_key = 11
-	and a.preferred = 1
-	and a.private = 0
-	and not exists (select 1 from toprocess1 t where aa._Allele_key = t._Allele_key)
+        and ms._Category_key = 1006
+        and ms._Object_key_2 = m._Marker_key
+        and aa._Allele_key = a._Object_key
+        and a._LogicalDB_key = 1
+        and a._MGIType_key = 11
+        and a.preferred = 1
+        and a.private = 0
+        and not exists (select 1 from toprocess1 t where aa._Allele_key = t._Allele_key)
         -- recombinase attribute/subtype
         and exists (select 1 from VOC_Annot va  
                 where va._AnnotType_key = 1014
                 and aa._Allele_key = va._Object_key
                 and va._Term_key = 11025588
                 )
-	'''
+        '''
 
 #is there a query 2?  default = true (1)
 isQuerySQL2 = 1
@@ -165,32 +164,32 @@ deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
 insertSQL1 = '''insert into ALL_Cre_Cache 
-	values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
-	'''
+        values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
+        '''
 insertSQL2 = '''insert into ALL_Cre_Cache 
-	values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
-	'''
+        values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
+        '''
 # for cre systems 
 embryoLabel = ''
 mouseLabel = ''
 creSystemsDict = {}
 
 def showUsage():
-	'''
-	#
-	# Purpose: Displays the correct usage of this program and exits
-	#
-	'''
+        '''
+        #
+        # Purpose: Displays the correct usage of this program and exits
+        #
+        '''
  
-	usage = 'usage: %s\n' % sys.argv[0] + \
-		'-S server\n' + \
-		'-D database\n' + \
-		'-U user\n' + \
-		'-P password file\n' + \
-		'-K object key\n'
+        usage = 'usage: %s\n' % sys.argv[0] + \
+                '-S server\n' + \
+                '-D database\n' + \
+                '-U user\n' + \
+                '-P password file\n' + \
+                '-K object key\n'
 
-	sys.stderr.write(usage)
-	sys.exit(1)
+        sys.stderr.write(usage)
+        sys.exit(1)
  
 def processAll():
     # Purpose: processes all Cre data
@@ -232,18 +231,18 @@ def initCreSystems():
     #
 
     embryoLabel = db.sql('''select s.label 
-	    from VOC_Term v, MGI_SetMember s 
-	    where v._Vocab_key= 90
-	    and v.term = 'embryo'
-	    and v._Term_key = s._Object_key
-	    and s._Set_key = 1047''', 'auto')[0]['label']
+            from VOC_Term v, MGI_SetMember s 
+            where v._Vocab_key= 90
+            and v.term = 'embryo'
+            and v._Term_key = s._Object_key
+            and s._Set_key = 1047''', 'auto')[0]['label']
 
     mouseLabel = db.sql('''select s.label 
-	    from VOC_Term v, MGI_SetMember s 
-	    where v._Vocab_key= 90
-	    and v.term = 'mouse'
-	    and v._Term_key = s._Object_key
-	    and s._Set_key = 1047''', 'auto')[0]['label']
+            from VOC_Term v, MGI_SetMember s 
+            where v._Vocab_key= 90
+            and v.term = 'mouse'
+            and v._Term_key = s._Object_key
+            and s._Set_key = 1047''', 'auto')[0]['label']
 
     #
     # translates EMAPA term to Cre System
@@ -253,17 +252,17 @@ def initCreSystems():
     results = db.sql('''
         (
         -- expression term is descendent of cre system term
-	select distinct e._EMAPA_Term_key, e._Stage_key, v2.term, s.label
-	from GXD_Expression e, DAG_Closure c, 
-	        VOC_Term v1, VOC_Term v2,
-		MGI_SetMember s
-	where e._AssayType_key in (9,10,11)
-	and e._EMAPA_Term_key = v1._Term_key
-	and v1._Term_key = c._DescendentObject_key
-	and c._MGIType_key = 13
-	and c._AncestorObject_key = v2._Term_key
-	and v2._Term_key = s._Object_key
-	and s._Set_key = 1047
+        select distinct e._EMAPA_Term_key, e._Stage_key, v2.term, s.label
+        from GXD_Expression e, DAG_Closure c, 
+                VOC_Term v1, VOC_Term v2,
+                MGI_SetMember s
+        where e._AssayType_key in (9,10,11)
+        and e._EMAPA_Term_key = v1._Term_key
+        and v1._Term_key = c._DescendentObject_key
+        and c._MGIType_key = 13
+        and c._AncestorObject_key = v2._Term_key
+        and v2._Term_key = s._Object_key
+        and s._Set_key = 1047
 
         union all
 
@@ -271,17 +270,17 @@ def initCreSystems():
         select distinct e._EMAPA_Term_key, e._Stage_key, v1.term, s.label
         from GXD_Expression e, MGI_SetMember s, VOC_Term v1
         where e._AssayType_key in (9,10,11)
-	and e._EMAPA_Term_key = v1._Term_key
+        and e._EMAPA_Term_key = v1._Term_key
         and e._EMAPA_Term_key = s._Object_key
         and s._Set_key = 1047
         )
         order by _EMAPA_Term_key, _Stage_key
-	''', 'auto')
+        ''', 'auto')
 
     for r in results:
         key = r['_EMAPA_Term_key']
         value = r 
-        if not creSystemsDict.has_key(key):
+        if key not in creSystemsDict:
             creSystemsDict[key] = []
         creSystemsDict[key].append(r)
 
@@ -318,23 +317,23 @@ def processCreSystems(emapaKey, emapaTerm, stageKey):
 
     for c in creSystemsDict[emapaKey]:
 
-	# if cre-system label is empty, use the emapa term
+        # if cre-system label is empty, use the emapa term
         if c['label'] == None:
             creLabel = c['term']
-	# else use the cre-system label (mgi_setmember.label)
+        # else use the cre-system label (mgi_setmember.label)
         else:
             creLabel = c['label']
 
         if c['term'] == 'embryo' and stageKey < 27:
-	    isEmbryo = 1
+            isEmbryo = 1
 
         elif c['term'] == 'embryo' and stageKey >= 27:
-	    isMouse = 1
+            isMouse = 1
 
         elif c['term'] == 'mouse':
-	    isMouse = 1
+            isMouse = 1
 
-	# or any other system (no duplicates)
+        # or any other system (no duplicates)
         elif creLabel not in creSystemsList:
             creSystemsList.append(creLabel)
 
@@ -365,8 +364,8 @@ def process(mode):
     if mode == 'bcp':
        outBCP = open(os.environ['ALLCACHEBCPDIR'] + '/ALL_Cre_Cache.bcp', 'w')
     else:
-	db.sql(deleteSQL, None)
-	db.commit()
+        db.sql(deleteSQL, None)
+        db.commit()
 
     #
     # next available primary key
@@ -375,12 +374,12 @@ def process(mode):
     if mode == 'sql':
         results = db.sql('select max(_Cache_key) as cacheKey from ALL_Cre_Cache', 'auto')
         for r in results:
-	    nextMaxKey = r['cacheKey']
+            nextMaxKey = r['cacheKey']
 
         if nextMaxKey == None:
             nextMaxKey = 0
     else:
-	nextMaxKey = 0
+        nextMaxKey = 0
 
     nextMaxKey = nextMaxKey + 1
     results = db.sql('select * from toprocess1', 'auto')
@@ -388,51 +387,51 @@ def process(mode):
 
         creSystemsList = processCreSystems(r['_EMAPA_Term_key'], r['emapaTerm'], r['_Stage_key']) 
 
-	if mode == 'sql':
-	    for printCreLabel in creSystemsList:
-	        db.sql(insertSQL1 % (str(nextMaxKey),
-			       r['_Allele_key'],
+        if mode == 'sql':
+            for printCreLabel in creSystemsList:
+                db.sql(insertSQL1 % (str(nextMaxKey),
+                               r['_Allele_key'],
                                r['_Allele_Type_key'],
-		               r['_EMAPA_Term_key'],
-		               r['_Stage_key'],
-		               r['_Assay_key'],
-		               r['accID'],
-		               r['symbol'],
-		               r['name'],
-		               r['alleleType'],
-		               r['driverGene'],
-		               r['emapaTerm'],
-		               r['age'],
-		               r['ageMin'],
-		               r['ageMax'],
-		               r['expressed'],
-		               r['hasImage'],
-		               printCreLabel,
-		               userKey, userKey), None)
+                               r['_EMAPA_Term_key'],
+                               r['_Stage_key'],
+                               r['_Assay_key'],
+                               r['accID'],
+                               r['symbol'],
+                               r['name'],
+                               r['alleleType'],
+                               r['driverGene'],
+                               r['emapaTerm'],
+                               r['age'],
+                               r['ageMin'],
+                               r['ageMax'],
+                               r['expressed'],
+                               r['hasImage'],
+                               printCreLabel,
+                               userKey, userKey), None)
                 nextMaxKey = nextMaxKey + 1
 
         else:
-	    for printCreLabel in creSystemsList:
+            for printCreLabel in creSystemsList:
                 outBCP.write(str(nextMaxKey) + COLDL +
-		     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
+                     mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
-		     mgi_utils.prvalue(r['_EMAPA_Term_key']) + COLDL +
-		     mgi_utils.prvalue(r['_Stage_key']) + COLDL +
-		     mgi_utils.prvalue(r['_Assay_key']) + COLDL +
-		     mgi_utils.prvalue(r['accID']) + COLDL +
-		     mgi_utils.prvalue(r['symbol']) + COLDL +
-		     mgi_utils.prvalue(r['name']) + COLDL +
-		     mgi_utils.prvalue(r['alleleType']) + COLDL +
-		     mgi_utils.prvalue(r['driverGene']) + COLDL +
-		     mgi_utils.prvalue(r['emapaTerm']) + COLDL +
-		     mgi_utils.prvalue(r['age']) + COLDL +
-		     mgi_utils.prvalue(r['ageMin']) + COLDL +
-		     mgi_utils.prvalue(r['ageMax']) + COLDL +
-		     mgi_utils.prvalue(r['expressed']) + COLDL +
-		     mgi_utils.prvalue(r['hasImage']) + COLDL +
-		     mgi_utils.prvalue(printCreLabel) + COLDL +
-		     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
-		     loaddate + COLDL + loaddate + LINEDL)
+                     mgi_utils.prvalue(r['_EMAPA_Term_key']) + COLDL +
+                     mgi_utils.prvalue(r['_Stage_key']) + COLDL +
+                     mgi_utils.prvalue(r['_Assay_key']) + COLDL +
+                     mgi_utils.prvalue(r['accID']) + COLDL +
+                     mgi_utils.prvalue(r['symbol']) + COLDL +
+                     mgi_utils.prvalue(r['name']) + COLDL +
+                     mgi_utils.prvalue(r['alleleType']) + COLDL +
+                     mgi_utils.prvalue(r['driverGene']) + COLDL +
+                     mgi_utils.prvalue(r['emapaTerm']) + COLDL +
+                     mgi_utils.prvalue(r['age']) + COLDL +
+                     mgi_utils.prvalue(r['ageMin']) + COLDL +
+                     mgi_utils.prvalue(r['ageMax']) + COLDL +
+                     mgi_utils.prvalue(r['expressed']) + COLDL +
+                     mgi_utils.prvalue(r['hasImage']) + COLDL +
+                     mgi_utils.prvalue(printCreLabel) + COLDL +
+                     mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
+                     loaddate + COLDL + loaddate + LINEDL)
                 nextMaxKey = nextMaxKey + 1
 
     #
@@ -446,37 +445,37 @@ def process(mode):
         for r in results:
 
             nextMaxKey = nextMaxKey + 1
-	    if mode == 'sql':
-	        db.sql(insertSQL2 % (str(nextMaxKey) ,
-				   r['_Allele_key'],
+            if mode == 'sql':
+                db.sql(insertSQL2 % (str(nextMaxKey) ,
+                                   r['_Allele_key'],
                                    r['_Allele_Type_key'],
-		                   r['accID'],
-		                   r['symbol'],
-		                   r['name'],
-		                   r['alleleType'],
-		                   r['driverGene'],
-		                   userKey, userKey), None)
+                                   r['accID'],
+                                   r['symbol'],
+                                   r['name'],
+                                   r['alleleType'],
+                                   r['driverGene'],
+                                   userKey, userKey), None)
             else:
                 outBCP.write(str(nextMaxKey) + COLDL +
-			 mgi_utils.prvalue(r['_Allele_key']) + COLDL +
+                         mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue(r['accID']) + COLDL +
-		         mgi_utils.prvalue(r['symbol']) + COLDL +
-		         mgi_utils.prvalue(r['name']) + COLDL +
-		         mgi_utils.prvalue(r['alleleType']) + COLDL +
-		         mgi_utils.prvalue(r['driverGene']) + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue('') + COLDL +
-		         mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
-		         loaddate + COLDL + loaddate + LINEDL)
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue(r['accID']) + COLDL +
+                         mgi_utils.prvalue(r['symbol']) + COLDL +
+                         mgi_utils.prvalue(r['name']) + COLDL +
+                         mgi_utils.prvalue(r['alleleType']) + COLDL +
+                         mgi_utils.prvalue(r['driverGene']) + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
+                         mgi_utils.prvalue(userKey) + COLDL + mgi_utils.prvalue(userKey) + COLDL + 
+                         loaddate + COLDL + loaddate + LINEDL)
 
     if mode == 'bcp':
        outBCP.close()
@@ -488,9 +487,9 @@ def main():
     global userKey
 
     try:
-	    optlist, args = getopt.getopt(sys.argv[1:], 'S:D:U:P:K:')
+            optlist, args = getopt.getopt(sys.argv[1:], 'S:D:U:P:K:')
     except:
-	    showUsage()
+            showUsage()
 
     server = None
     database = None
@@ -499,25 +498,25 @@ def main():
     objectKey = None
 
     for opt in optlist:
-	    if opt[0] == '-S':
-		    server = opt[1]
-	    elif opt[0] == '-D':
-		    database = opt[1]
-	    elif opt[0] == '-U':
-		    user = opt[1]
-	    elif opt[0] == '-P':
-		    password = string.strip(open(opt[1], 'r').readline())
-	    elif opt[0] == '-K':
-		    objectKey = opt[1]
-	    else:
-		        showUsage()
+            if opt[0] == '-S':
+                    server = opt[1]
+            elif opt[0] == '-D':
+                    database = opt[1]
+            elif opt[0] == '-U':
+                    user = opt[1]
+            elif opt[0] == '-P':
+                    password = str.strip(open(opt[1], 'r').readline())
+            elif opt[0] == '-K':
+                    objectKey = opt[1]
+            else:
+                        showUsage()
 
     if server is None or \
        database is None or \
        user is None or \
        password is None or \
        objectKey is None:
-	    showUsage()
+            showUsage()
 
     db.set_sqlLogin(user, password, server, database)
     db.useOneConnection(1)
@@ -549,4 +548,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

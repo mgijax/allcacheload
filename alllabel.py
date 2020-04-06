@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 
 '''
 #
@@ -42,66 +41,66 @@ def writeRecord(results, labelStatusKey, priority, labelType, labelTypeName):
 
     for r in results:
 
-	if labelTypeName is None:
-	    labelTypeName = r['labelTypeName']
+        if labelTypeName is None:
+            labelTypeName = r['labelTypeName']
 
         outBCP.write(mgi_utils.prvalue(r['_Allele_key']) + COLDL + \
-        	mgi_utils.prvalue(labelStatusKey) + COLDL + \
-        	mgi_utils.prvalue(priority) + COLDL + \
-        	mgi_utils.prvalue(r['label']) + COLDL + \
-        	mgi_utils.prvalue(labelType) + COLDL + \
-        	mgi_utils.prvalue(labelTypeName) + COLDL + \
-        	loaddate + COLDL + \
-        	loaddate + LINEDL)
+                mgi_utils.prvalue(labelStatusKey) + COLDL + \
+                mgi_utils.prvalue(priority) + COLDL + \
+                mgi_utils.prvalue(r['label']) + COLDL + \
+                mgi_utils.prvalue(labelType) + COLDL + \
+                mgi_utils.prvalue(labelTypeName) + COLDL + \
+                loaddate + COLDL + \
+                loaddate + LINEDL)
 
-    print 'processed (%d) records...%s' % (len(results), mgi_utils.date())
+    print('processed (%d) records...%s' % (len(results), mgi_utils.date()))
 
 def priority1():
 
-	# allele symbols
+        # allele symbols
 
-        print 'processing priority 1...%s' % mgi_utils.date()
+        print('processing priority 1...%s' % mgi_utils.date())
 
-	cmd = '''select distinct a._Allele_key, a.symbol as label 
-		 from ALL_Allele a where a.isWildType = 0 
-	      '''
+        cmd = '''select distinct a._Allele_key, a.symbol as label 
+                 from ALL_Allele a where a.isWildType = 0 
+              '''
 
-	if alleleKey is not None:
-		cmd = cmd + 'and a._Allele_key = %s\n' % alleleKey
+        if alleleKey is not None:
+                cmd = cmd + 'and a._Allele_key = %s\n' % alleleKey
 
-	writeRecord(db.sql(cmd, 'auto'), 1, 1, 'AS', 'allele symbol')
+        writeRecord(db.sql(cmd, 'auto'), 1, 1, 'AS', 'allele symbol')
 
 def priority2():
 
-	# allele names
+        # allele names
 
-        print 'processing priority 2...%s' % mgi_utils.date()
+        print('processing priority 2...%s' % mgi_utils.date())
 
-	cmd = '''select distinct a._Allele_key, a.name as label 
-		 from ALL_Allele a where a.isWildType = 0 
-	      '''
+        cmd = '''select distinct a._Allele_key, a.name as label 
+                 from ALL_Allele a where a.isWildType = 0 
+              '''
 
-	if alleleKey is not None:
-		cmd = cmd + 'and a._Allele_key = %s\n' % alleleKey
+        if alleleKey is not None:
+                cmd = cmd + 'and a._Allele_key = %s\n' % alleleKey
 
-	writeRecord(db.sql(cmd, 'auto'), 1, 2, 'AN', 'allele name')
+        writeRecord(db.sql(cmd, 'auto'), 1, 2, 'AN', 'allele name')
 
 def priority3():
 
-	# synonyms
+        # synonyms
 
-        print 'processing priority 3...%s' % mgi_utils.date()
+        print('processing priority 3...%s' % mgi_utils.date())
 
-	cmd = '''select distinct s._Object_key as _Allele_key, s.synonym as label
-		from MGI_SynonymType st, MGI_Synonym s 
-		where st._MGIType_key = 11 
-		and st._SynonymType_key = s._SynonymType_key 
-		'''
+        cmd = '''select distinct s._Object_key as _Allele_key, s.synonym as label
+                from MGI_SynonymType st, MGI_Synonym s 
+                where st._MGIType_key = 11 
+                and st._SynonymType_key = s._SynonymType_key 
+                '''
 
-	if alleleKey is not None:
-		cmd = cmd + 'and s._Object_key = %s\n' % alleleKey
+        if alleleKey is not None:
+                cmd = cmd + 'and s._Object_key = %s\n' % alleleKey
 
-	writeRecord(db.sql(cmd, 'auto'), 1, 3, 'AY', 'synonym')
+        writeRecord(db.sql(cmd, 'auto'), 1, 3, 'AY', 'synonym')
 
 #
 # Main Routine
@@ -110,20 +109,19 @@ def priority3():
 db.useOneConnection(1)
 
 if len(sys.argv) == 2:
-	alleleKey = sys.argv[1]
+        alleleKey = sys.argv[1]
 else:
-	alleleKey = None
+        alleleKey = None
 
 outputDir = os.environ['ALLCACHEBCPDIR']
-print '%s' % mgi_utils.date()
+print('%s' % mgi_utils.date())
 outBCP = open(outputDir + '/ALL_Label.bcp', 'w')
 
 priority1()
 priority2()
 priority3()
 
-print '%s' % mgi_utils.date()
+print('%s' % mgi_utils.date())
 outBCP.close()
 db.commit()
 db.useOneConnection(0)
-
