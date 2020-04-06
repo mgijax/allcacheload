@@ -16,19 +16,19 @@ date >> ${LOG}
 
 cd ${ALLCACHEBCPDIR}
 
-${ALLCACHELOAD}/allelecombination.py ${PYTHON_CMD} -K0 | tee -a ${LOG}
+${PYTHON} ${ALLCACHELOAD}/allelecombination.py ${PYTHON_CMD} -K0 | tee -a ${LOG}
 
 setenv DATAFILE 	allelecombnotetype1.rpt
 setenv NOTETYPE		"Combination Type 1"
-${NOTELOAD}/mginoteload.py ${PYTHON_CMD} -I${DATAFILE} -M${NOTEMODE} -O${NOTEOBJECTTYPE} -T"${NOTETYPE}" | tee -a ${LOG}
+${PYTHON} ${NOTELOAD}/mginoteload.py ${PYTHON_CMD} -I${DATAFILE} -M${NOTEMODE} -O${NOTEOBJECTTYPE} -T"${NOTETYPE}" | tee -a ${LOG}
 
 setenv DATAFILE 	allelecombnotetype2.rpt
 setenv NOTETYPE		"Combination Type 2"
-${NOTELOAD}/mginoteload.py ${PYTHON_CMD} -I${DATAFILE} -M${NOTEMODE} -O${NOTEOBJECTTYPE} -T"${NOTETYPE}" | tee -a ${LOG}
+${PYTHON} ${NOTELOAD}/mginoteload.py ${PYTHON_CMD} -I${DATAFILE} -M${NOTEMODE} -O${NOTEOBJECTTYPE} -T"${NOTETYPE}" | tee -a ${LOG}
 
 setenv DATAFILE 	allelecombnotetype3.rpt
 setenv NOTETYPE		"Combination Type 3"
-${NOTELOAD}/mginoteload.py ${PYTHON_CMD} -I${DATAFILE} -M${NOTEMODE} -O${NOTEOBJECTTYPE} -T"${NOTETYPE}" | tee -a ${LOG}
+${PYTHON} ${NOTELOAD}/mginoteload.py ${PYTHON_CMD} -I${DATAFILE} -M${NOTEMODE} -O${NOTEOBJECTTYPE} -T"${NOTETYPE}" | tee -a ${LOG}
 
 date >> ${LOG}
 
