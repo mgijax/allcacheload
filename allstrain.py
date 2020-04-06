@@ -82,12 +82,12 @@ def selectData():
         #		Other (see notes)
         #
 
-        cmd = '''select a._Allele_key, substr.a.symbol,1,35) as symbol,
+        cmd = '''select a._Allele_key, substring(a.symbol,1,35) as symbol,
                 a._Strain_key as sooKey, 
-                substr.s1.strain,1,25) as alleleStrain, 
+                substring(s1.strain,1,25) as alleleStrain, 
                 cc._Strain_key as parentKey, 
-                substr.s2.strain,1,25) as parentStrain,  
-                substr.cc.cellLine,1,25) as parentCellLine
+                substring(s2.strain,1,25) as parentStrain,  
+                substring(cc.cellLine,1,25) as parentCellLine
                 INTO TEMPORARY TABLE toUpdate1
                 from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
                 PRB_Strain s1, PRB_Strain s2
@@ -107,14 +107,14 @@ def selectData():
         # select mutant cell line strain != parent cell line strain
         #
 
-        cmd = '''select substr.a.symbol,1,35) as symbol,
+        cmd = '''select substring(a.symbol,1,35) as symbol,
                 c._CellLine_key as mutantCellLineKey,
-                substr.c.cellLine,1,25) as mutantCellLine,
+                substring(c.cellLine,1,25) as mutantCellLine,
                 c._Strain_key as mutantKey, 
-                substr.s1.strain,1,25) as mutantStrain, 
+                substring(s1.strain,1,25) as mutantStrain, 
                 cc._Strain_key as parentKey, 
-                substr.s2.strain,1,25) as parentStrain, 
-                substr.cc.cellLine,1,25) as parentCellLine
+                substring(s2.strain,1,25) as parentStrain, 
+                substring(cc.cellLine,1,25) as parentCellLine
                 INTO TEMPORARY TABLE toUpdate2
                 from ALL_Allele a, ALL_Allele_CellLine mc, ALL_CellLine c, ALL_CellLine cc, ALL_CellLine_Derivation d,
                 PRB_Strain s1, PRB_Strain s2
