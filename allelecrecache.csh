@@ -25,7 +25,7 @@ date | tee -a ${LOG}
 
 # Create the bcp file
 
-./allelecrecache.py ${PYTHON_CMD} -K${OBJECTKEY} | tee -a ${LOG}
+${PYTHON} ./allelecrecache.py ${PYTHON_CMD} -K${OBJECTKEY} | tee -a ${LOG}
 
 if ( -z ${ALLCACHEBCPDIR}/${TABLE}.bcp ) then
 echo 'BCP File is empty' | tee -a ${LOG}

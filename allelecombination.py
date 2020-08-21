@@ -1,4 +1,3 @@
-#!/usr/local/bin/python
 
 #
 # Program: allelecombination.py
@@ -71,21 +70,21 @@ combNoteType3 = 1018
 DEBUG = 0
 
 def showUsage():
-	'''
-	#
-	# Purpose: Displays the correct usage of this program and exits
-	#
-	'''
+        '''
+        #
+        # Purpose: Displays the correct usage of this program and exits
+        #
+        '''
  
-	usage = 'usage: %s\n' % sys.argv[0] + \
-		'-S server\n' + \
-		'-D database\n' + \
-		'-U user\n' + \
-		'-P password file\n' + \
-		'-K object key\n'
+        usage = 'usage: %s\n' % sys.argv[0] + \
+                '-S server\n' + \
+                '-D database\n' + \
+                '-U user\n' + \
+                '-P password file\n' + \
+                '-K object key\n'
 
-	sys.stderr.write(usage)
-	sys.exit(1)
+        sys.stderr.write(usage)
+        sys.exit(1)
  
 def processAll():
     # Purpose: processes all Genotype data
@@ -97,12 +96,12 @@ def processAll():
     # select all Genotypes
 
     db.sql('''select a._Object_key as _Genotype_key, a.accID as genotypeID INTO TEMPORARY TABLE toprocess 
-	from ACC_Accession a 
-	where a._MGIType_key = 12 
-	and a._LogicalDB_key = 1 
-	and a.prefixPart = 'MGI:' 
-	and a.preferred = 1
-	''', None)
+        from ACC_Accession a 
+        where a._MGIType_key = 12 
+        and a._LogicalDB_key = 1 
+        and a.prefixPart = 'MGI:' 
+        and a.preferred = 1
+        ''', None)
 
     db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
@@ -122,9 +121,9 @@ def processByAllele(objectKey):
     # select all Genotypes of a specified Allele
 
     db.sql('''
-	select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_AlleleGenotype 
-	where _Allele_key = %s
-	''' % (objectKey), None)
+        select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_AlleleGenotype 
+        where _Allele_key = %s
+        ''' % (objectKey), None)
 
     db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
@@ -140,8 +139,8 @@ def processByMarker(objectKey):
     # select all Genotypes of a specified Marker
 
     db.sql('''select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_AlleleGenotype
-	where _Marker_key = %s
-	''' % (objectKey), None)
+        where _Marker_key = %s
+        ''' % (objectKey), None)
 
     db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
@@ -157,27 +156,27 @@ def processByGenotype(objectKey):
     # select all Genotypes of a specified Genotype
 
     db.sql('''
-	select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_Genotype
-	where _Genotype_key = %s
-	''' % (objectKey), None)
+        select distinct _Genotype_key, null as genotypeID INTO TEMPORARY TABLE toprocess from GXD_Genotype
+        where _Genotype_key = %s
+        ''' % (objectKey), None)
 
     db.sql('create index idx1 on toprocess(_Genotype_key)', None)
 
     process('sql')
 
 def processNote(objectKey, notes, noteTypeKey):
-    # Purpose: generate string for MGI Note insertion
-    # Returns: noteCmd, a string that contains the insert commands
+    # Purpose: generate str.for MGI Note insertion
+    # Returns: noteCmd, a str.that contains the insert commands
     # Assumes:
     # Effects:
     # Throws:
 
     noteCmd = '''insert into MGI_Note values ((select * from noteKeyMax), %s, %s, %s, %s, %s, now(), now());\n
-	      ''' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
+              ''' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
 
     noteCmd = noteCmd + \
         '''insert into MGI_NoteChunk values ((select * from noteKeyMax), 1, '%s', %s, %s, now(), now());\n
-	''' % (notes, userKey, userKey)
+        ''' % (notes, userKey, userKey)
 
     # increment the MGI_Note._Note_key
 
@@ -195,123 +194,123 @@ def process(mode):
     global notenewline
 
     if mode == 'bcp':
-	fp1 = reportlib.init('allelecombnotetype1', printHeading = None)
-	fp2 = reportlib.init('allelecombnotetype2', printHeading = None)
-	fp3 = reportlib.init('allelecombnotetype3', printHeading = None)
+        fp1 = reportlib.init('allelecombnotetype1', printHeading = None)
+        fp2 = reportlib.init('allelecombnotetype2', printHeading = None)
+        fp3 = reportlib.init('allelecombnotetype3', printHeading = None)
     else:
-	notenewline = '\n'
+        notenewline = '\n'
 
     # delete existiing Allele Combination notes for Genotypes we're processing
 
     if DEBUG:
-        print '\ndeleting existing allele combination\n'
-	sys.stdout.flush()
+        print('\ndeleting existing allele combination\n')
+        sys.stdout.flush()
 
     db.sql('''delete from MGI_Note 
-	using toprocess p 
-	where p._Genotype_key = MGI_Note._Object_key 
-	and MGI_Note._MGIType_key = %s 
-	and MGI_Note._NoteType_key in (%s,%s,%s)
-	''' % (mgiTypeKey, combNoteType1, combNoteType2, combNoteType3), None)
+        using toprocess p 
+        where p._Genotype_key = MGI_Note._Object_key 
+        and MGI_Note._MGIType_key = %s 
+        and MGI_Note._NoteType_key in (%s,%s,%s)
+        ''' % (mgiTypeKey, combNoteType1, combNoteType2, combNoteType3), None)
 
     if DEBUG:
-        print 'finished deleting existing allele combination\n'
-	sys.stdout.flush()
+        print('finished deleting existing allele combination\n')
+        sys.stdout.flush()
 
     # read in appropriate records
 
     if DEBUG:
-        print '\nselecting existing allele combination\n'
-	sys.stdout.flush()
+        print('\nselecting existing allele combination\n')
+        sys.stdout.flush()
 
     cmd = '''(
-	    select p._Genotype_key,
-	    p.genotypeID,
-	    t1.term as alleleState, 
-	    t2.term as compound, 
-	    a1.symbol as allele1, 
-	    a2.symbol as allele2, 
-	    a1.isWildType as allele1WildType, 
-	    a2.isWildType as allele2WildType, 
-	    c1.accID as mgiID1, 
-	    c2.accID as mgiID2, 
-	    g.sequenceNum, m.chromosome 
-	    from toprocess p, 
-	    GXD_AllelePair g LEFT OUTER JOIN MRK_Marker m on (g._Marker_key = m._Marker_key),
-	    VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, 
-	    ACC_Accession c1, ACC_Accession c2
-	    where p._Genotype_key = g._Genotype_key 
-	    and g._PairState_key = t1._Term_key 
-	    and g._Compound_key = t2._Term_key 
-	    and g._Allele_key_1 = a1._Allele_key 
-	    and g._Allele_key_2 = a2._Allele_key 
-	    and g._Allele_key_1 = c1._Object_key 
-	    and c1._MGIType_key = 11 
-	    and c1._LogicalDB_key = 1 
-	    and c1.prefixPart = 'MGI:' 
-	    and c1.preferred = 1 
-	    and g._Allele_key_2 = c2._Object_key 
-	    and c2._MGIType_key = 11 
-	    and c2._LogicalDB_key = 1 
-	    and c2.prefixPart = 'MGI:' 
-	    and c2.preferred = 1 
-	    union 
-	    select p._Genotype_key,
-	    p.genotypeID,
-	    t1.term as alleleState, 
-	    t2.term as compound, 
-	    a1.symbol as allele1,
-	    null as allele2, 
-	    a1.isWildType as allele1WildType, 
-	    0 as allele2WildType, 
-	    c1.accID as mgiID1, 
-	    null as mgiID2, 
-	    g.sequenceNum, m.chromosome 
-	    from toprocess p, 
-	    GXD_AllelePair g LEFT OUTER JOIN MRK_Marker m on (g._Marker_key = m._Marker_key),
-	    VOC_Term t1, VOC_Term t2, ALL_Allele a1, ACC_Accession c1
-	    where p._Genotype_key = g._Genotype_key 
-	    and g._PairState_key = t1._Term_key 
-	    and g._Compound_key = t2._Term_key 
-	    and g._Allele_key_1 = a1._Allele_key 
-	    and g._Allele_key_2 is null 
-	    and g._Allele_key_1 = c1._Object_key 
-	    and c1._MGIType_key = 11 
-	    and c1._LogicalDB_key = 1 
-	    and c1.prefixPart = 'MGI:' 
-	    and c1.preferred = 1 
-	    )
-	    order by _Genotype_key, sequenceNum;\n'''
+            select p._Genotype_key,
+            p.genotypeID,
+            t1.term as alleleState, 
+            t2.term as compound, 
+            a1.symbol as allele1, 
+            a2.symbol as allele2, 
+            a1.isWildType as allele1WildType, 
+            a2.isWildType as allele2WildType, 
+            c1.accID as mgiID1, 
+            c2.accID as mgiID2, 
+            g.sequenceNum, m.chromosome 
+            from toprocess p, 
+            GXD_AllelePair g LEFT OUTER JOIN MRK_Marker m on (g._Marker_key = m._Marker_key),
+            VOC_Term t1, VOC_Term t2, ALL_Allele a1, ALL_Allele a2, 
+            ACC_Accession c1, ACC_Accession c2
+            where p._Genotype_key = g._Genotype_key 
+            and g._PairState_key = t1._Term_key 
+            and g._Compound_key = t2._Term_key 
+            and g._Allele_key_1 = a1._Allele_key 
+            and g._Allele_key_2 = a2._Allele_key 
+            and g._Allele_key_1 = c1._Object_key 
+            and c1._MGIType_key = 11 
+            and c1._LogicalDB_key = 1 
+            and c1.prefixPart = 'MGI:' 
+            and c1.preferred = 1 
+            and g._Allele_key_2 = c2._Object_key 
+            and c2._MGIType_key = 11 
+            and c2._LogicalDB_key = 1 
+            and c2.prefixPart = 'MGI:' 
+            and c2.preferred = 1 
+            union 
+            select p._Genotype_key,
+            p.genotypeID,
+            t1.term as alleleState, 
+            t2.term as compound, 
+            a1.symbol as allele1,
+            null as allele2, 
+            a1.isWildType as allele1WildType, 
+            0 as allele2WildType, 
+            c1.accID as mgiID1, 
+            null as mgiID2, 
+            g.sequenceNum, m.chromosome 
+            from toprocess p, 
+            GXD_AllelePair g LEFT OUTER JOIN MRK_Marker m on (g._Marker_key = m._Marker_key),
+            VOC_Term t1, VOC_Term t2, ALL_Allele a1, ACC_Accession c1
+            where p._Genotype_key = g._Genotype_key 
+            and g._PairState_key = t1._Term_key 
+            and g._Compound_key = t2._Term_key 
+            and g._Allele_key_1 = a1._Allele_key 
+            and g._Allele_key_2 is null 
+            and g._Allele_key_1 = c1._Object_key 
+            and c1._MGIType_key = 11 
+            and c1._LogicalDB_key = 1 
+            and c1.prefixPart = 'MGI:' 
+            and c1.preferred = 1 
+            )
+            order by _Genotype_key, sequenceNum;\n'''
 
     results = db.sql(cmd, 'auto')
 
     if DEBUG:
-        print 'finished selecting existing allele combination\n'
-	print str(results)
-	sys.stdout.flush()
+        print('finished selecting existing allele combination\n')
+        print(str(results))
+        sys.stdout.flush()
 
     if DEBUG:
-        print '\nputting existing allele combination into a list\n'
-	sys.stdout.flush()
+        print('\nputting existing allele combination into a list\n')
+        sys.stdout.flush()
 
     genotypes = {}
     for r in results:
         key = r['_Genotype_key']
         value = r
 
-        if not genotypes.has_key(key):
-	    genotypes[key] = []
+        if key not in genotypes:
+            genotypes[key] = []
         genotypes[key].append(r)
 
     if DEBUG:
-        print 'finished putting existing allele combination into a list\n'
-	sys.stdout.flush()
+        print('finished putting existing allele combination into a list\n')
+        sys.stdout.flush()
 
-    for g in genotypes.keys():
+    for g in list(genotypes.keys()):
 
-	if DEBUG:
-        	print '\nrunning allele combination for genotype\n', genotypes[g]
-		sys.stdout.flush()
+        if DEBUG:
+                print('\nrunning allele combination for genotype\n', genotypes[g])
+                sys.stdout.flush()
 
         foundTop = 0
         foundBottom = 0
@@ -327,38 +326,38 @@ def process(mode):
         bottomType2 = ''
         bottomType3 = ''
 
-	# if alleleStatue = 'Hemizygous X-linked' or 'Hemizygous Y-linked'
-	# appears more than once in a given genotype
-	# then set isCollapse = 1
+        # if alleleStatue = 'Hemizygous X-linked' or 'Hemizygous Y-linked'
+        # appears more than once in a given genotype
+        # then set isCollapse = 1
 
-	isCollapseX = 0
-	isCollapseY = 0
-	xcounter = 0
-	ycounter = 0
+        isCollapseX = 0
+        isCollapseY = 0
+        xcounter = 0
+        ycounter = 0
 
         for r in genotypes[g]:
             alleleState = r['alleleState']
 
             if alleleState == 'Hemizygous X-linked':
-		xcounter = xcounter + 1
+                xcounter = xcounter + 1
 
             if alleleState == 'Hemizygous Y-linked':
-		ycounter = ycounter + 1
+                ycounter = ycounter + 1
 
-	if xcounter > 1:
-	    isCollapseX = 1
-	if ycounter > 1:
-	    isCollapseY = 1
+        if xcounter > 1:
+            isCollapseX = 1
+        if ycounter > 1:
+            isCollapseY = 1
 
-	#
-	# iterate thru each allele pair for this genotype
-	#
+        #
+        # iterate thru each allele pair for this genotype
+        #
 
         for r in genotypes[g]:
 
             compound = r['compound']
             alleleState = r['alleleState']
-	    chr = r['chromosome']
+            chr = r['chromosome']
 
             allele1 = r['allele1']
             allele1WildType = r['allele1WildType']
@@ -369,34 +368,34 @@ def process(mode):
             mgiID2 = r['mgiID2']
 
             if alleleState in ['Homoplasmic', 'Heteroplasmic'] and compound == 'Not Applicable':
-	        separatorTopBottom = ''
-		separatorBottom = ''
+                separatorTopBottom = ''
+                separatorBottom = ''
             elif alleleState in ['Homoplasmic', 'Heteroplasmic']:
-	        separatorTopBottom = ', '
-		separatorBottom = ', '
-	    else:
-	        separatorTopBottom = '/'
-		separatorBottom = ' '
+                separatorTopBottom = ', '
+                separatorBottom = ', '
+            else:
+                separatorTopBottom = '/'
+                separatorBottom = ' '
 
-	    #
-	    # topType3, bottomType3 = "master" link-out text
-	    # the type2 display is created by attaching the appropriate type3 "master"
-	    #
-	    # type2 = ''
-	    # type2 = previous type2 + type3 (master)
-	    #
+            #
+            # topType3, bottomType3 = "master" link-out text
+            # the type2 display is created by attaching the appropriate type3 "master"
+            #
+            # type2 = ''
+            # type2 = previous type2 + type3 (master)
+            #
 
             # only used for compound = 'Not Applicable'
-	    if allele1WildType == 1:
-	        topType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
-	    else:
-	        topType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+            if allele1WildType == 1:
+                topType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
+            else:
+                topType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
             if alleleState in ['Homozygous', 'Heterozygous']:
                 if allele2WildType == 1:
-	            bottomType3 = '\AlleleSymbol(' + mgiID2 + '|0)'
+                    bottomType3 = '\AlleleSymbol(' + mgiID2 + '|0)'
                 else:
-	            bottomType3 = '\Allele(' + mgiID2 + '|' + allele2 + '|)'
+                    bottomType3 = '\Allele(' + mgiID2 + '|' + allele2 + '|)'
 
             elif alleleState == 'Hemizygous X-linked':
                 bottomType3 = 'Y'
@@ -414,82 +413,82 @@ def process(mode):
                 bottomType3 = ''
 
             elif (alleleState == 'Hemizygous Y-linked') or (alleleState == 'Hemizygous Insertion' and chr == 'Y'):
-	        if allele1WildType == 1:
-	            bottomType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
-	        else:
-	            bottomType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                if allele1WildType == 1:
+                    bottomType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
+                else:
+                    bottomType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
                 topType3 = 'X'
 
-	    # if Allele Pair does not have a compound attribute
+            # if Allele Pair does not have a compound attribute
 
             if alleleState == 'Hemizygous X-linked' and isCollapseX:
 
-		#
-		# collapse the row into one display
-		#
-		# MGI:3511894
-		# Maoa    Maoa<K284stop>  Hemizygous X-linked
-		# Maob    Maob<tm1Shih>   Hemizygous X-linked
-		#
-		# Display:
-		#
-		# Maoa<K284stop> Maob<tm1Shih>/Y
-		#
+                #
+                # collapse the row into one display
+                #
+                # MGI:3511894
+                # Maoa    Maoa<K284stop>  Hemizygous X-linked
+                # Maob    Maob<tm1Shih>   Hemizygous X-linked
+                #
+                # Display:
+                #
+                # Maoa<K284stop> Maob<tm1Shih>/Y
+                #
 
                 if foundTop >= 1:
                     topType1 = topType1 + ' ' + allele1
                     topType2 = topType2 + topType3
                 else:
-		    topType1 = allele1
+                    topType1 = allele1
                     topType2 = topType3
 
                 bottomType1 = bottomType2 = bottomType3
-		topType3 = topType2
-		foundTop = foundTop + 1
-		foundBottom = foundBottom + 1
+                topType3 = topType2
+                foundTop = foundTop + 1
+                foundBottom = foundBottom + 1
 
             elif alleleState == 'Hemizygous Y-linked' and isCollapseY:
 
-		#
-		# collapse the row into one display
-		#
-		# MGI:3043585
-		# Del(Y)1Psb    Del(Y)1Psb	Hemizygous Y-linked
-		# Sry     	Sry<dl1Rlb>	Hemizygous Y-linked
-		# Tg(Sry)2Ei	Tg(Sry)2Ei	Hemizygous Insertion
-		#
-		# Display:
-		#
-		# X/Del(Y)1Psb Sry<dl1Rlb>
-		# Tg(Sry)2Ei/0
-		#
+                #
+                # collapse the row into one display
+                #
+                # MGI:3043585
+                # Del(Y)1Psb    Del(Y)1Psb	Hemizygous Y-linked
+                # Sry     	Sry<dl1Rlb>	Hemizygous Y-linked
+                # Tg(Sry)2Ei	Tg(Sry)2Ei	Hemizygous Insertion
+                #
+                # Display:
+                #
+                # X/Del(Y)1Psb Sry<dl1Rlb>
+                # Tg(Sry)2Ei/0
+                #
 
                 if foundBottom >= 1:
                     bottomType1 = bottomType1 + ' ' + allele1
                     bottomType2 = bottomType2 + bottomType3
                 else:
-		    bottomType1 = allele1
-	            bottomType2 = bottomType3
+                    bottomType1 = allele1
+                    bottomType2 = bottomType3
 
                 topType1 = topType2 = topType3
-		foundTop = foundTop + 1
-		foundBottom = foundBottom + 1
+                foundTop = foundTop + 1
+                foundBottom = foundBottom + 1
 
             elif compound == 'Not Applicable':
 
-		#
-		# there is one display line per row
-		# each row gets its own unique display
-		#
-		# MGI:3776480
-		# Il2rg   Il2rg<tm1Cgn>   Hemizygous X-linked
-		# Rag2    Rag2<tm1Fwa>    Homozygous
-		#
-		# Display:
-		#
-		# Il2rg<tm1Cgn>/Y
-		# Rag2<tm1Fwa>/Rag2<tm1Fwa>
-		#
+                #
+                # there is one display line per row
+                # each row gets its own unique display
+                #
+                # MGI:3776480
+                # Il2rg   Il2rg<tm1Cgn>   Hemizygous X-linked
+                # Rag2    Rag2<tm1Fwa>    Homozygous
+                #
+                # Display:
+                #
+                # Il2rg<tm1Cgn>/Y
+                # Rag2<tm1Fwa>/Rag2<tm1Fwa>
+                #
 
                 if foundTop >= 1 and foundBottom >= 1:
                     displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + notenewline
@@ -540,9 +539,9 @@ def process(mode):
                     topType1 = topType1 + separatorBottom + allele1
                     topType2 = topType2 + ' \Allele(' + mgiID1 + '|' + allele1 + '|)'
 
-		# if there is no top, then copy in existing information
+                # if there is no top, then copy in existing information
 
-		else:
+                else:
                     topType1 = allele1
                     topType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
@@ -554,61 +553,61 @@ def process(mode):
 
                 if foundBottom >= 1:
                     bottomType1 = bottomType1 + separatorBottom + allele1
-		    bottomType2 = bottomType2 + separatorBottom
+                    bottomType2 = bottomType2 + separatorBottom
 
-		    if allele1WildType == 1:
-			bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
+                    if allele1WildType == 1:
+                        bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
                     else:
-			bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                        bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
-		# if there is no bottom, then copy in existing information
+                # if there is no bottom, then copy in existing information
 
-		else:
+                else:
                     bottomType1 = allele1
 
-		    if allele1WildType == 1:
-			bottomType2 = '\AlleleSymbol(' + mgiID1 + '|0)'
+                    if allele1WildType == 1:
+                        bottomType2 = '\AlleleSymbol(' + mgiID1 + '|0)'
                     else:
-			bottomType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                        bottomType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 foundBottom = foundBottom + 1
 
         if foundTop >= 1 and foundBottom >= 1:
             displayNotes1 = displayNotes1 + topType1 + separatorTopBottom + bottomType1 + notenewline
             displayNotes2 = displayNotes2 + topType2 + separatorTopBottom + bottomType2 + notenewline
-	    #print displayNotes1
-	    #print displayNotes2
+            #print displayNotes1
+            #print displayNotes2
 
-	if mode == 'sql':
-	    #
-	    # initialize the MGI_Note._Note_key primary key
-	    #
+        if mode == 'sql':
+            #
+            # initialize the MGI_Note._Note_key primary key
+            #
 
-	    cmd = 'begin transaction;\n'
-	    cmd = cmd + 'create temp table noteKeyMax on commit drop as select max(_Note_key) + 1 as noteKey from MGI_Note;\n'
-	    cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
-	    cmd = cmd + processNote(g, displayNotes2, combNoteType2)
-	    cmd = cmd + processNote(g, displayNotes2, combNoteType3)
+            cmd = 'begin transaction;\n'
+            cmd = cmd + 'create temp table noteKeyMax on commit drop as select max(_Note_key) + 1 as noteKey from MGI_Note;\n'
+            cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
+            cmd = cmd + processNote(g, displayNotes2, combNoteType2)
+            cmd = cmd + processNote(g, displayNotes2, combNoteType3)
 
-	    print processNote(g, displayNotes1, combNoteType1)
-	    print processNote(g, displayNotes1, combNoteType2)
-	    print processNote(g, displayNotes1, combNoteType3)
-	    #print cmd
+            print(processNote(g, displayNotes1, combNoteType1))
+            print(processNote(g, displayNotes1, combNoteType2))
+            print(processNote(g, displayNotes1, combNoteType3))
+            #print cmd
 
-	    cmd = cmd + "commit transaction;\n"
+            cmd = cmd + "commit transaction;\n"
 
-	    db.sql(cmd, None)
+            db.sql(cmd, None)
         else:
             fp1.write(r['genotypeID'] + reportlib.TAB + displayNotes1 + reportlib.CRT)
             fp2.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
             fp3.write(r['genotypeID'] + reportlib.TAB + displayNotes2 + reportlib.CRT)
 
-	if DEBUG:
-       	    print 'finished with genotype\n'
-	    sys.stdout.flush()
+        if DEBUG:
+            print('finished with genotype\n')
+            sys.stdout.flush()
 
     if DEBUG:
-        print '\nfinished running allele combination\n'
+        print('\nfinished running allele combination\n')
         sys.stdout.flush()
 
     if mode == 'bcp':
@@ -623,9 +622,9 @@ def process(mode):
 #
 
 try:
-	optlist, args = getopt.getopt(sys.argv[1:], 'S:D:U:P:K:')
+        optlist, args = getopt.getopt(sys.argv[1:], 'S:D:U:P:K:')
 except:
-	showUsage()
+        showUsage()
 
 server = None
 database = None
@@ -634,25 +633,25 @@ password = None
 objectKey = None
 
 for opt in optlist:
-	if opt[0] == '-S':
-		server = opt[1]
-	elif opt[0] == '-D':
-		database = opt[1]
-	elif opt[0] == '-U':
-		user = opt[1]
-	elif opt[0] == '-P':
-		password = string.strip(open(opt[1], 'r').readline())
-	elif opt[0] == '-K':
-		objectKey = opt[1]
-	else:
-		showUsage()
+        if opt[0] == '-S':
+                server = opt[1]
+        elif opt[0] == '-D':
+                database = opt[1]
+        elif opt[0] == '-U':
+                user = opt[1]
+        elif opt[0] == '-P':
+                password = str.strip(open(opt[1], 'r').readline())
+        elif opt[0] == '-K':
+                objectKey = opt[1]
+        else:
+                showUsage()
 
 if server is None or \
    database is None or \
    user is None or \
    password is None or \
    objectKey is None:
-	showUsage()
+        showUsage()
 
 db.set_sqlLogin(user, password, server, database)
 db.useOneConnection(1)
@@ -679,4 +678,3 @@ elif scriptName == 'allelecombinationByGenotype.py':
     
 db.commit()
 db.useOneConnection(0)
-

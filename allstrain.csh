@@ -14,7 +14,7 @@ touch $LOG
 
 date | tee -a ${LOG}
 
-${ALLCACHELOAD}/allstrain.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
+${PYTHON} ${ALLCACHELOAD}/allstrain.py -S${MGD_DBSERVER} -D${MGD_DBNAME} -U${MGD_DBUSER} -P${MGD_DBPASSWORDFILE} | tee -a ${LOG}
 
 date | tee -a ${LOG}
 
