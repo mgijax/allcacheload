@@ -295,8 +295,9 @@ db.useOneConnection(1)
 # select all alleles...
 selectData()
 
+# 03/11/2021 : report is no longer used/per Cindy, Michelle
 # run the qc reports
-qcreport()
+#qcreport()
 
 # execute the update
 doUpdate()
