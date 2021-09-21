@@ -70,6 +70,7 @@ loaddate = loadlib.loaddate
 # select Cre alleles that have genotype/structure information
 # status = approved, autoload ONLY
 
+
 querySQL1 = '''
         select distinct
           ag._Allele_key, 
