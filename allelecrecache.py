@@ -35,6 +35,11 @@
 #
 # Modification History:
 #
+#
+# 09/21/2021    sc
+#       - YAKS project, expression cell type annotation
+#         add cell type to cache
+#
 # 03/15/2016	lec
 #	- TR12223/gxd anatomy II/Cre Systems
 #
@@ -71,12 +76,13 @@ loaddate = loadlib.loaddate
 # status = approved, autoload ONLY
 
 
-querySQL1 = '''
+querySQL1a = '''
         select distinct
           ag._Allele_key, 
           aa._Allele_Type_key,
           e._EMAPA_Term_key,
           e._Stage_key,
+          e._CellType_Term_key,
           e._Assay_key,
           aa.symbol,
           aa.name,
@@ -90,7 +96,7 @@ querySQL1 = '''
           e.hasImage,
           a.accID
 
-        INTO TEMPORARY TABLE toprocess1
+        INTO TEMPORARY TABLE toprocess1a
 
         from 
           GXD_Expression e, 
@@ -127,6 +133,13 @@ querySQL1 = '''
 
         '''
 
+querySQL1b = '''
+        select tp.*, t.term as celltypeterm
+        into temporary table toprocess1b
+        from toprocess1a tp
+        left outer join VOC_Term t on (tp._celltype_term_key = t._term_key)
+        '''
+
 #	  and aa.symbol like 'Acan%'
 #	  and aa.symbol like 'Agrp<tm1(cre)Lowl>'
 
@@ -148,7 +161,7 @@ querySQL2 = '''
         and a._MGIType_key = 11
         and a.preferred = 1
         and a.private = 0
-        and not exists (select 1 from toprocess1 t where aa._Allele_key = t._Allele_key)
+        and not exists (select 1 from toprocess1b t where aa._Allele_key = t._Allele_key)
         -- recombinase attribute/subtype
         and exists (select 1 from VOC_Annot va  
                 where va._AnnotType_key = 1014
@@ -165,10 +178,10 @@ deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
 insertSQL1 = '''insert into ALL_Cre_Cache 
-        values (%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
+        values (%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
         '''
 insertSQL2 = '''insert into ALL_Cre_Cache 
-        values (%s,%s,%s,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
+        values (%s,%s,%s,null,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
         '''
 # for cre systems 
 embryoLabel = ''
@@ -195,7 +208,8 @@ def showUsage():
 def processAll():
     # Purpose: processes all Cre data
 
-    db.sql(querySQL1, None)
+    db.sql(querySQL1a, None)
+    db.sql(querySQL1b, None)
     db.sql(querySQL2, None)
     process('bcp')
 
@@ -204,7 +218,8 @@ def processByAllele(objectKey):
 
     global deleteSQL
 
-    db.sql(querySQL1 + " and aa._Allele_key = " + objectKey, None)
+    db.sql(querySQL1a + " and aa._Allele_key = " + objectKey, None)
+    db.sql(querySQL1b, None)
     db.sql(querySQL2 + " and aa._Allele_key = " + objectKey, None)
     deleteSQL = deleteSQLAllele % (objectKey)
     process('sql')
@@ -214,7 +229,8 @@ def processByAssay(objectKey):
 
     global deleteSQL
 
-    db.sql(querySQL1 + " and e._Assay_key = " + objectKey, None)
+    db.sql(querySQL1a + " and e._Assay_key = " + objectKey, None)
+    db.sql(querySQL1b, None)
     db.sql(querySQL2 + " and 0 = 1", None)
     deleteSQL = deleteSQLAssay % (objectKey)
     isQuerySQL2 = 0
@@ -300,7 +316,8 @@ def processCreSystems(emapaKey, emapaTerm, stageKey):
     # example:
     #	EMAPA term = 'sacral vertebral cartilage condensation' 
     #   in DAG/parent, translates to 'skeletal system', 'mesanchyme', 'embryo', 'mouse'
-    #   in Cre System, these translate to 'skeletal system', 'mesenchyme', 'embryo-other', 'postnatal-other'
+    #   in Cre System, these translate to 'skeletal system', 'mesenchyme', 'embryo-other', 
+    #            'postnatal-other'
     #   what gets included in cache table : 'skeletal system', 'mesenchyme'
     #
     #   EMAPA term = 'cartilage'
@@ -359,8 +376,9 @@ def processCreSystems(emapaKey, emapaTerm, stageKey):
 def process(mode):
     # Purpose: process data using either 'sql' or 'bcp' mode
 
-    db.sql('create index idx1 on toprocess1(_Allele_key)', None)
-    db.sql('create index idx2 on toprocess2(_Allele_key)', None)
+    db.sql('create index idx1 on toprocess1a(_CellType_Term_key)', None)
+    db.sql('create index idx2 on toprocess1b(_Allele_key)', None)
+    db.sql('create index idx3 on toprocess2(_Allele_key)', None)
 
     if mode == 'bcp':
        outBCP = open(os.environ['ALLCACHEBCPDIR'] + '/ALL_Cre_Cache.bcp', 'w')
@@ -383,7 +401,7 @@ def process(mode):
         nextMaxKey = 0
 
     nextMaxKey = nextMaxKey + 1
-    results = db.sql('select * from toprocess1', 'auto')
+    results = db.sql('select * from toprocess1b', 'auto')
     for r in results:
 
         creSystemsList = processCreSystems(r['_EMAPA_Term_key'], r['emapaTerm'], r['_Stage_key']) 
@@ -394,6 +412,7 @@ def process(mode):
                                r['_Allele_key'],
                                r['_Allele_Type_key'],
                                r['_EMAPA_Term_key'],
+                               r['_CellType_Term_key'], 
                                r['_Stage_key'],
                                r['_Assay_key'],
                                r['accID'],
@@ -417,6 +436,7 @@ def process(mode):
                      mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                      mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
                      mgi_utils.prvalue(r['_EMAPA_Term_key']) + COLDL +
+                     mgi_utils.prvalue(r['_CellType_Term_key']) + COLDL +
                      mgi_utils.prvalue(r['_Stage_key']) + COLDL +
                      mgi_utils.prvalue(r['_Assay_key']) + COLDL +
                      mgi_utils.prvalue(r['accID']) + COLDL +
@@ -460,6 +480,7 @@ def process(mode):
                 outBCP.write(str(nextMaxKey) + COLDL +
                          mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
                          mgi_utils.prvalue('') + COLDL +
                          mgi_utils.prvalue('') + COLDL +
                          mgi_utils.prvalue('') + COLDL +
