@@ -39,6 +39,8 @@
 # 09/21/2021    sc
 #       - YAKS project, expression cell type annotation
 #         add cell type to cache
+#         Note: processByAllele and processByAssay are not currently being used by the API/PWI
+#               but are left intact in case we need to update that cache again on the fly
 #
 # 03/15/2016	lec
 #	- TR12223/gxd anatomy II/Cre Systems
