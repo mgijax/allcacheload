@@ -6,7 +6,7 @@
 #
 # Purpose:
 #
-# To create MGI_Note, MGI_NoteChunk objects for Allele Combinations
+# To create MGI_Note objects for Allele Combinations
 #
 # displayNotes1
 # _NoteType_key = 1016
@@ -171,16 +171,8 @@ def processNote(objectKey, notes, noteTypeKey):
     # Effects:
     # Throws:
 
-    noteCmd = '''insert into MGI_Note values ((select * from noteKeyMax), %s, %s, %s, %s, %s, now(), now());\n
-              ''' % (objectKey, mgiTypeKey, noteTypeKey, userKey, userKey)
-
-    noteCmd = noteCmd + \
-        '''insert into MGI_NoteChunk values ((select * from noteKeyMax), 1, '%s', %s, %s, now(), now());\n
-        ''' % (notes, userKey, userKey)
-
-    # increment the MGI_Note._Note_key
-
-    noteCmd = noteCmd + 'update noteKeyMax set noteKey = noteKey + 1;\n'
+    noteCmd = '''insert into MGI_Note values (nextval('mgi_note_seq'), %s, %s, %s, %s, %s, '%s', now(), now());\n
+              ''' % (objectKey, mgiTypeKey, noteTypeKey, notes, userKey, userKey)
 
     return noteCmd
 
