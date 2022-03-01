@@ -171,7 +171,8 @@ def processNote(objectKey, notes, noteTypeKey):
     # Effects:
     # Throws:
 
-    noteCmd = '''insert into MGI_Note values (nextval('mgi_note_seq'), %s, %s, %s, %s, %s, '%s', now(), now());\n
+    notes = "'" + notes + "'"
+    noteCmd = '''insert into MGI_Note values (nextval('mgi_note_seq'), %s, %s, %s, %s, %s, %s, now(), now());\n
               ''' % (objectKey, mgiTypeKey, noteTypeKey, notes, userKey, userKey)
 
     return noteCmd
@@ -576,7 +577,6 @@ def process(mode):
             #
 
             cmd = 'begin transaction;\n'
-            cmd = cmd + 'create temp table noteKeyMax on commit drop as select max(_Note_key) + 1 as noteKey from MGI_Note;\n'
             cmd = cmd + processNote(g, displayNotes1, combNoteType1) 
             cmd = cmd + processNote(g, displayNotes2, combNoteType2)
             cmd = cmd + processNote(g, displayNotes2, combNoteType3)
