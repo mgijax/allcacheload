@@ -86,6 +86,7 @@ querySQL1a = '''
           e._Stage_key,
           e._CellType_Term_key,
           e._Assay_key,
+          e.strength,
           aa.symbol,
           aa.name,
           t1.term as alleleType,
@@ -180,10 +181,10 @@ deleteSQLAllele = 'delete from ALL_Cre_Cache where _Allele_key = %s'
 deleteSQLAssay = 'delete from ALL_Cre_Cache where _Assay_key = %s'
 
 insertSQL1 = '''insert into ALL_Cre_Cache 
-        values (%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
+        values (%s,%s,%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s','%s','%s','%s',%s,%s,%s,%s,%s,%s,now(),now())
         '''
 insertSQL2 = '''insert into ALL_Cre_Cache 
-        values (%s,%s,%s,null,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
+        values (%s,%s,%s,null,null,null,null,null,'%s','%s','%s','%s','%s','%s',null,null,null,null,null,%s,now(),now())
         '''
 # for cre systems 
 embryoLabel = ''
@@ -409,6 +410,12 @@ def process(mode):
         creSystemsList = processCreSystems(r['_EMAPA_Term_key'], r['emapaTerm'], r['_Stage_key']) 
 
         if mode == 'sql':
+
+            if r['strength'] is None:
+                strength = ""
+            else:
+                strength = r['strength']
+
             for printCreLabel in creSystemsList:
                 db.sql(insertSQL1 % (str(nextMaxKey),
                                r['_Allele_key'],
@@ -417,6 +424,7 @@ def process(mode):
                                r['_CellType_Term_key'], 
                                r['_Stage_key'],
                                r['_Assay_key'],
+                               strength,
                                r['accID'],
                                r['symbol'],
                                r['name'],
@@ -433,6 +441,12 @@ def process(mode):
                 nextMaxKey = nextMaxKey + 1
 
         else:
+
+            if r['strength'] is None:
+                strength = ""
+            else:
+                strength = r['strength']
+
             for printCreLabel in creSystemsList:
                 outBCP.write(str(nextMaxKey) + COLDL +
                      mgi_utils.prvalue(r['_Allele_key']) + COLDL +
@@ -441,6 +455,7 @@ def process(mode):
                      mgi_utils.prvalue(r['_CellType_Term_key']) + COLDL +
                      mgi_utils.prvalue(r['_Stage_key']) + COLDL +
                      mgi_utils.prvalue(r['_Assay_key']) + COLDL +
+                     mgi_utils.prvalue(strength) + COLDL +
                      mgi_utils.prvalue(r['accID']) + COLDL +
                      mgi_utils.prvalue(r['symbol']) + COLDL +
                      mgi_utils.prvalue(r['name']) + COLDL +
@@ -482,6 +497,7 @@ def process(mode):
                 outBCP.write(str(nextMaxKey) + COLDL +
                          mgi_utils.prvalue(r['_Allele_key']) + COLDL +
                          mgi_utils.prvalue(r['_Allele_Type_key']) + COLDL +
+                         mgi_utils.prvalue('') + COLDL +
                          mgi_utils.prvalue('') + COLDL +
                          mgi_utils.prvalue('') + COLDL +
                          mgi_utils.prvalue('') + COLDL +
