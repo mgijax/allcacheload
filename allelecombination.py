@@ -380,15 +380,15 @@ def process(mode):
 
             # only used for compound = 'Not Applicable'
             if allele1WildType == 1:
-                topType3 = r'\AlleleSymbol(' + mgiID1 + '|0)'
+                topType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
             else:
-                topType3 = r'\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                topType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
             if alleleState in ['Homozygous', 'Heterozygous']:
                 if allele2WildType == 1:
-                    bottomType3 = r'\AlleleSymbol(' + mgiID2 + '|0)'
+                    bottomType3 = '\AlleleSymbol(' + mgiID2 + '|0)'
                 else:
-                    bottomType3 = r'\Allele(' + mgiID2 + '|' + allele2 + '|)'
+                    bottomType3 = '\Allele(' + mgiID2 + '|' + allele2 + '|)'
 
             elif alleleState == 'Hemizygous X-linked':
                 bottomType3 = 'Y'
@@ -407,9 +407,9 @@ def process(mode):
 
             elif (alleleState == 'Hemizygous Y-linked') or (alleleState == 'Hemizygous Insertion' and chr == 'Y'):
                 if allele1WildType == 1:
-                    bottomType3 = r'\AlleleSymbol(' + mgiID1 + '|0)'
+                    bottomType3 = '\AlleleSymbol(' + mgiID1 + '|0)'
                 else:
-                    bottomType3 = r'\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                    bottomType3 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
                 topType3 = 'X'
 
             # if Allele Pair does not have a compound attribute
@@ -530,13 +530,13 @@ def process(mode):
 
                 if foundTop >= 1:
                     topType1 = topType1 + separatorBottom + allele1
-                    topType2 = topType2 + r' \Allele(' + mgiID1 + '|' + allele1 + '|)'
+                    topType2 = topType2 + ' \Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 # if there is no top, then copy in existing information
 
                 else:
                     topType1 = allele1
-                    topType2 = r'\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                    topType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 foundTop = foundTop + 1
 
@@ -549,9 +549,9 @@ def process(mode):
                     bottomType2 = bottomType2 + separatorBottom
 
                     if allele1WildType == 1:
-                        bottomType2 = bottomType2 + r'\AlleleSymbol(' + mgiID1 + '|0)'
+                        bottomType2 = bottomType2 + '\AlleleSymbol(' + mgiID1 + '|0)'
                     else:
-                        bottomType2 = bottomType2 + r'\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                        bottomType2 = bottomType2 + '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 # if there is no bottom, then copy in existing information
 
@@ -559,9 +559,9 @@ def process(mode):
                     bottomType1 = allele1
 
                     if allele1WildType == 1:
-                        bottomType2 = r'\AlleleSymbol(' + mgiID1 + '|0)'
+                        bottomType2 = '\AlleleSymbol(' + mgiID1 + '|0)'
                     else:
-                        bottomType2 = r'\Allele(' + mgiID1 + '|' + allele1 + '|)'
+                        bottomType2 = '\Allele(' + mgiID1 + '|' + allele1 + '|)'
 
                 foundBottom = foundBottom + 1
 

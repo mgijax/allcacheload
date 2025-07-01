@@ -16,7 +16,7 @@ date >> ${LOG}
 
 cd ${ALLCACHEBCPDIR}
 
-${PYTHON} ${ALLCACHELOAD}/allelecombination.py ${PYTHON_CMD} -K0 | tee -a ${LOG}
+${PYTHON} -W "ignore::SyntaxWarning" ${ALLCACHELOAD}/allelecombination.py ${PYTHON_CMD} -K0 | tee -a ${LOG}
 
 setenv DATAFILE 	allelecombnotetype1.rpt
 setenv NOTETYPE		"Combination Type 1"

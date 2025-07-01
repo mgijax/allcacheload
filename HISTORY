@@ -1,3 +1,10 @@
+TAG: allcacheload-6-0-25-2
+DATE: 07/01/2025
+STAFF: lec
+wts2-1693/e4g-306/Allele Combination/Genotype Display issue (Python 3.12)
+        modified:   allelecombination.csh
+        modified:   allelecombination.py
+
 TAG: allcacheload-6-0-25-1
 DATE: 05/22/2025
 STAFF: lec
